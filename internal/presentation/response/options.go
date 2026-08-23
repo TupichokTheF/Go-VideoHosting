@@ -2,9 +2,9 @@ package response
 
 import "net/http"
 
-type ResponseOption func(w http.ResponseWriter)
+type Option func(w http.ResponseWriter)
 
-func WithRefreshTokenCookie(token string) ResponseOption {
+func WithRefreshTokenCookie(token string) Option {
 	return func(w http.ResponseWriter) {
 		http.SetCookie(w, &http.Cookie{
 			Name:     "refresh_token",

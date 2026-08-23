@@ -21,7 +21,7 @@ func NewUserRepository(pool *pgxpool.Pool) *UserRepository {
 func (userRepo *UserRepository) GetUserByUsername(ctx context.Context, username string) (*user.User, error) {
 	var u *user.UserState = new(user.UserState)
 	err := userRepo.Pool.QueryRow(ctx,
-		"SELECT * FROM users WHERE username = $1",
+		"SELECT user_id, username, email, password FROM users WHERE username = $1",
 		username).Scan(&u.ID, &u.UserName, &u.UserEmail, &u.UserPassword)
 
 	if err != nil {
@@ -34,7 +34,7 @@ func (userRepo *UserRepository) GetUserByUsername(ctx context.Context, username 
 func (userRepo *UserRepository) GetUserByID(ctx context.Context, userID int) (*user.User, error) {
 	var u *user.UserState = new(user.UserState)
 	err := userRepo.Pool.QueryRow(ctx,
-		"SELECT * FROM users WHERE username = $1",
+		"SELECT user_id, username, email, password FROM users WHERE user_id = $1",
 		userID).Scan(&u.ID, &u.UserName, &u.UserEmail, &u.UserPassword)
 
 	if err != nil {

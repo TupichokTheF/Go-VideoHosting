@@ -72,6 +72,34 @@ paths:
       summary: Авторизация пользователя
       tags:
       - auth
+  /auth/refresh:
+    post:
+      description: Выдаёт новый access-токен по refresh-токену из cookie
+      parameters:
+      - default: refresh_token=<token>
+        description: Refresh-токен в cookie
+        in: header
+        name: refresh_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/project_internal_presentation_schemas.TokensSchema'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/project_internal_presentation_schemas.ErrorSchema'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/project_internal_presentation_schemas.ErrorSchema'
+      summary: Обновление access-токена
+      tags:
+      - auth
   /auth/register:
     post:
       consumes:

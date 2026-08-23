@@ -9,28 +9,29 @@ import (
 )
 
 type JWTManager struct {
-	secretKey  []byte
+	accessSecret  []byte
+	refreshSecret []byte
 	accessTTL  time.Duration
 	refreshTTL time.Duration
 }
 
-func NewJWTManager(secret []byte, accessTTL, refreshTTL time.Duration) *JWTManager {
+func NewJWTManager(accessSecret []byte, refershSecret []byte, accessTTL, refreshTTL time.Duration) *JWTManager {
 	return &JWTManager{
-		secretKey:  secret,
+		accessSecret:  accessSecret,
 		accessTTL:  accessTTL,
 		refreshTTL: refreshTTL,
 	}
 }
 
 func (manager *JWTManager) NewAccessToken(userID int) (string, error) {
-	return manager.newToken(userID, manager.accessTTL)
+	return manager.newToken(manager.accessSecret, userID, manager.accessTTL)
 }
 
 func (manager *JWTManager) NewRefreshToken(userID int) (string, error) {
-	return manager.newToken(userID, manager.refreshTTL)
+	return manager.newToken(manager.refreshSecret, userID, manager.refreshTTL)
 }
 
-func (manager *JWTManager) newToken(userID int, ttl time.Duration) (string, error) {
+func (manager *JWTManager) newToken(secret []byte, userID int, ttl time.Duration) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id": userID,
 		"iat":     time.Now().Unix(),
@@ -39,12 +40,20 @@ func (manager *JWTManager) newToken(userID int, ttl time.Duration) (string, erro
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return token.SignedString(manager.secretKey)
+	return token.SignedString(secret)
 }
 
-func (m *JWTManager) ParseToken(inputToken string) (int, error) {
+func (m *JWTManager) ParseRefreshToken(inputToken string) (int, error) {
+	return m.parseToken(inputToken, m.refreshSecret)
+}
+
+func (m *JWTManager) ParseAccessToken(inputToken string) (int, error) {
+	return m.parseToken(inputToken, m.accessSecret)
+}
+
+func (m *JWTManager) parseToken(inputToken string, secret []byte) (int, error) {
 	token, err := jwt.Parse(inputToken, func(t *jwt.Token) (any, error) {
-		return m.secretKey, nil
+		return secret, nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 	if err != nil {
 		return 0, fmt.Errorf("parse token: %w", err)

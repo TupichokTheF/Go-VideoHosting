@@ -2,25 +2,25 @@ package handlers
 
 import (
 	"net/http"
-	"project/internal/application/ports"
-	"project/internal/presentation/appcontext"
+	app_ports "project/internal/application/ports"
+	"project/internal/presentation/context"
 	"project/internal/presentation/mappers"
 	"project/internal/presentation/response"
 	"project/internal/presentation/schemas"
 )
 
 type UserHandler struct {
-	userService ports.UserService
+	userService app_ports.UserService
 }
 
-func NewUserHandlers(userService ports.UserService) *UserHandler {
+func NewUserHandler(userService app_ports.UserService) *UserHandler {
 	return &UserHandler{
 		userService: userService,
 	}
 }
 
 func (handler *UserHandler) UserInfo(w http.ResponseWriter, req *http.Request) {
-	userID, ok := appcontext.UserIDFromContext(req.Context())
+	userID, ok := app_context.UserIDFromContext(req.Context())
 	if !ok {
 		errorResponse := schemas.ErrorSchema{Error: "Unauthorized"}
 		response.Error(w, http.StatusUnauthorized, errorResponse)

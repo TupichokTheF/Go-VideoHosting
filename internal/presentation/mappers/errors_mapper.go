@@ -3,6 +3,7 @@ package mappers
 import (
 	"errors"
 	"net/http"
+	app_errors "project/internal/application/errors"
 	"project/internal/domain/user"
 )
 
@@ -18,6 +19,8 @@ func FromApplicationToApiError(appError error) (int, string) {
 		return http.StatusBadRequest, "User wasn't found"
 	case errors.Is(appError, user.InvalidPassword):
 		return http.StatusUnauthorized, "Invalid password"
+	case errors.Is(appError, app_errors.InvalidTokenError):
+		return http.StatusUnauthorized, "Invalid token"
 	default:
 		return http.StatusInternalServerError, "Internal server error"
 	}

@@ -5,7 +5,9 @@ import (
 	"net/http"
 	"project/internal/application/services"
 	"project/internal/core"
+	"project/internal/infrastructure/cache"
 	"project/internal/infrastructure/database/postgres"
+	app_redis "project/internal/infrastructure/database/redis"
 	"project/internal/infrastructure/repositories"
 	"project/internal/infrastructure/security"
 	"project/internal/presentation/handlers"
@@ -29,18 +31,27 @@ func start() {
 	}
 	defer db.CloseConnection()
 
+	redisClient, err := app_redis.NewClient(&cfg.RedisConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	userRepo := repositories.NewUserRepository(db.ConnPool)
-	jwtManager := security.NewJWTManager(cfg.SecretKey, cfg.AccessTTL, cfg.RefreshTTL)
+
+	tokenCache := cache.NewTokenCache(redisClient, cfg.RefreshTTL)
+
+	jwtManager := security.NewJWTManager(cfg.AccessSecretKey, cfg.RefreshSecretKey, cfg.AccessTTL, cfg.RefreshTTL)
 	hasher := security.NewBcryptHasher()
 
-	userService := services.NewUserService(userRepo, jwtManager, hasher)
+	userService := services.NewUserService(userRepo, tokenCache)
+	authService := services.NewAuthService(userRepo, jwtManager, hasher, tokenCache)
 
-	authHandler := handlers.NewAuthHandler(userService)
-	userHandler := handlers.NewUserHandlers(userService)
+	authHandler := handlers.NewAuthHandler(authService)
+	userHandler := handlers.NewUserHandler(userService)
 
 	routersOptions := []routers.Option{
 		routers.WithAuthRouter(authHandler),
-		routers.WithUserRouter(userHandler, jwtManager),
+		routers.WithUserRouter(userHandler, authService),
 	}
 
 	if cfg.Swagger {

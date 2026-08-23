@@ -53,6 +53,48 @@
                 }
             }
         },
+        "/auth/refresh": {
+            "post": {
+                "description": "Выдаёт новый access-токен по refresh-токену из cookie",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "summary": "Обновление access-токена",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "refresh_token=\u003ctoken\u003e",
+                        "description": "Refresh-токен в cookie",
+                        "name": "refresh_token",
+                        "in": "header",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/project_internal_presentation_schemas.TokensSchema"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/project_internal_presentation_schemas.ErrorSchema"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/project_internal_presentation_schemas.ErrorSchema"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/register": {
             "post": {
                 "consumes": [

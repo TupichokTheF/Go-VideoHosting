@@ -1,7 +1,7 @@
 package schemas
 
 type UserInfoSchema struct {
-	UserID    int    `json:"user_id"`
+	UserID    int    `json:"id"`
 	Username  string `json:"username"`
-	UserEmail string `json:"user_email"`
+	UserEmail string `json:"email"`
 }
