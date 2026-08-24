@@ -7,10 +7,9 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-
 func NewClient(cfg *core.RedisConfig) (*redis.Client, error) {
 	opts := redis.Options{
-		Addr: cfg.Address(),
+		Addr:       cfg.Address(),
 		MaxRetries: 5,
 	}
 

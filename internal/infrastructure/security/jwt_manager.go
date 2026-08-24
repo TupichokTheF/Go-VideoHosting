@@ -11,15 +11,16 @@ import (
 type JWTManager struct {
 	accessSecret  []byte
 	refreshSecret []byte
-	accessTTL  time.Duration
-	refreshTTL time.Duration
+	accessTTL     time.Duration
+	refreshTTL    time.Duration
 }
 
-func NewJWTManager(accessSecret []byte, refershSecret []byte, accessTTL, refreshTTL time.Duration) *JWTManager {
+func NewJWTManager(accessSecret []byte, refreshSecret []byte, accessTTL, refreshTTL time.Duration) *JWTManager {
 	return &JWTManager{
 		accessSecret:  accessSecret,
-		accessTTL:  accessTTL,
-		refreshTTL: refreshTTL,
+		refreshSecret: refreshSecret,
+		accessTTL:     accessTTL,
+		refreshTTL:    refreshTTL,
 	}
 }
 

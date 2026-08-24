@@ -9,7 +9,6 @@ import (
 	infra_ports "project/internal/infrastructure/ports"
 )
 
-
 type AuthService struct {
 	userRepo   user.Repository
 	jwtManager infra_ports.JWTManagerInterface
@@ -17,9 +16,8 @@ type AuthService struct {
 	tokenCache infra_ports.TokenCacheInterface
 }
 
-
-func NewAuthService(userRepo user.Repository, 
-	jwtManager infra_ports.JWTManagerInterface, 
+func NewAuthService(userRepo user.Repository,
+	jwtManager infra_ports.JWTManagerInterface,
 	hasher infra_ports.HasherInterface,
 	tokenCache infra_ports.TokenCacheInterface) *AuthService {
 	return &AuthService{
@@ -88,7 +86,7 @@ func (authService *AuthService) RefreshToken(ctx context.Context, token string) 
 	}
 
 	return &dtos.TokensDTO{
-		AccessToken:  accessToken,
+		AccessToken: accessToken,
 	}, nil
 }
 
@@ -99,7 +97,7 @@ func (authService *AuthService) Logout(ctx context.Context, refreshToken string)
 	}
 
 	if err := authService.tokenCache.DeleteToken(ctx, userID); err != nil {
-		return fmt.Errorf("logout: %w", app_errors.InvalidTokenError) 
+		return fmt.Errorf("logout: %w", app_errors.InvalidTokenError)
 	}
 
 	return nil

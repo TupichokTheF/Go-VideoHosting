@@ -9,7 +9,6 @@ import (
 	"strings"
 )
 
-
 func AuthMiddleware(authService app_ports.AuthService) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -26,7 +25,7 @@ func AuthMiddleware(authService app_ports.AuthService) func(next http.Handler) h
 				response.Error(w, http.StatusUnauthorized, errorResponse)
 				return
 			}
-			
+
 			if ok := authService.IsLoggedOut(req.Context(), refreshToken.Value); ok {
 				errorResponse := schemas.ErrorSchema{Error: "Unauthorized"}
 				response.Error(w, http.StatusUnauthorized, errorResponse)

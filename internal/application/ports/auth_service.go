@@ -5,7 +5,6 @@ import (
 	"project/internal/application/dtos"
 )
 
-
 type AuthService interface {
 	RegisterUser(ctx context.Context, userCreateDTO *dtos.UserCreateDTO) (*dtos.UserCreatedDTO, error)
 	AuthorizeUser(ctx context.Context, authorizeDTO *dtos.AuthorizeDTO) (*dtos.TokensDTO, error)

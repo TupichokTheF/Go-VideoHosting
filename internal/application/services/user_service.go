@@ -13,7 +13,6 @@ type UserService struct {
 	tokenCache infra_ports.TokenCacheInterface
 }
 
-
 func NewUserService(userRepo user.Repository, tokenCache infra_ports.TokenCacheInterface) *UserService {
 	return &UserService{
 		userRepo:   userRepo,

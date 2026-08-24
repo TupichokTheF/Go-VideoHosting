@@ -1,6 +1,5 @@
 package infra_ports
 
-
 type JWTManagerInterface interface {
 	NewAccessToken(userID int) (string, error)
 	NewRefreshToken(userID int) (string, error)

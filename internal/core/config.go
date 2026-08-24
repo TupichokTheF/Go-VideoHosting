@@ -16,6 +16,7 @@ type Config struct {
 	RedisConfig
 	LocalConfig
 	JWTConfig
+	MinioConfig
 }
 
 type HTTPConfig struct {
@@ -44,7 +45,7 @@ func (d *DataBaseConfig) GetURL() string {
 
 type RedisConfig struct {
 	Host string `env:"REDIS_HOST" env-required:"true"`
-	Port int `env:"REDIS_PORT" env-required:"true"`
+	Port int    `env:"REDIS_PORT" env-required:"true"`
 }
 
 func (cfg *RedisConfig) Address() string {
@@ -57,9 +58,22 @@ type LocalConfig struct {
 
 type JWTConfig struct {
 	AccessSecretKey  []byte        `env:"ACCESS_SECRET_KEY" env-required:"true"`
-	RefreshSecretKey  []byte        `env:"REFRESH_SECRET_KEY" env-required:"true"`
-	AccessTTL  time.Duration `env:"ACCESS_TOKEN_TTL" env-required:"true"`
-	RefreshTTL time.Duration `env:"REFRESH_TOKEN_TTL" env-required:"true"`
+	RefreshSecretKey []byte        `env:"REFRESH_SECRET_KEY" env-required:"true"`
+	AccessTTL        time.Duration `env:"ACCESS_TOKEN_TTL" env-required:"true"`
+	RefreshTTL       time.Duration `env:"REFRESH_TOKEN_TTL" env-required:"true"`
+}
+
+type MinioConfig struct {
+	Host     string `env:"MINIO_HOST" env-required:"true"`
+	Port     int    `env:"MINIO_PORt" env-required:"true"`
+	Bucket   string `env:"MINIO_BUCKET" env-required:"true"`
+	User     string `env:"MINIO_USER" env-required:"true"`
+	Password string `env:"MINIO_PASSWORD" env-required:"true"`
+	UseSSL   bool   `env:"MINIO_SSL" env-required:"true"`
+}
+
+func (cfg *MinioConfig) Endpoint() string {
+	return fmt.Sprintf("%s:%v", cfg.Host, cfg.Port)
 }
 
 func LoadConfig() *Config {

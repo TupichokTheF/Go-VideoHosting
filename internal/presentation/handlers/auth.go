@@ -76,7 +76,7 @@ func (handler *AuthHandler) Authorization(w http.ResponseWriter, req *http.Reque
 	responseOptons := []response.Option{
 		response.WithRefreshTokenCookie(result.RefreshToken),
 	}
-	
+
 	response.JSON(w, http.StatusOK, mappers.FromTokensDTOToSchema(result), responseOptons...)
 }
 
