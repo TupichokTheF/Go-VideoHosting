@@ -12,6 +12,7 @@ func WithAuthRouter(handler *handlers.AuthHandler) Option {
 			r.Post("/register", handler.CreateUser)
 			r.Post("/login", handler.Authorization)
 			r.Post("/refresh", handler.RefreshToken)
+			r.Post("/logout", handler.Logout)
 		})
 	}
 }

@@ -9,18 +9,18 @@ import (
 )
 
 type UserRepository struct {
-	*pgxpool.Pool
+	pool *pgxpool.Pool
 }
 
 func NewUserRepository(pool *pgxpool.Pool) *UserRepository {
 	return &UserRepository{
-		Pool: pool,
+		pool: pool,
 	}
 }
 
-func (userRepo *UserRepository) GetUserByUsername(ctx context.Context, username string) (*user.User, error) {
+func (repo *UserRepository) GetUserByUsername(ctx context.Context, username string) (*user.User, error) {
 	var u *user.UserState = new(user.UserState)
-	err := userRepo.Pool.QueryRow(ctx,
+	err := repo.pool.QueryRow(ctx,
 		"SELECT user_id, username, email, password FROM users WHERE username = $1",
 		username).Scan(&u.ID, &u.UserName, &u.UserEmail, &u.UserPassword)
 
@@ -31,9 +31,9 @@ func (userRepo *UserRepository) GetUserByUsername(ctx context.Context, username 
 	return user.Reconstitute(u), nil
 }
 
-func (userRepo *UserRepository) GetUserByID(ctx context.Context, userID int) (*user.User, error) {
+func (repo *UserRepository) GetUserByID(ctx context.Context, userID int) (*user.User, error) {
 	var u *user.UserState = new(user.UserState)
-	err := userRepo.Pool.QueryRow(ctx,
+	err := repo.pool.QueryRow(ctx,
 		"SELECT user_id, username, email, password FROM users WHERE user_id = $1",
 		userID).Scan(&u.ID, &u.UserName, &u.UserEmail, &u.UserPassword)
 
@@ -44,10 +44,10 @@ func (userRepo *UserRepository) GetUserByID(ctx context.Context, userID int) (*u
 	return user.Reconstitute(u), nil
 }
 
-func (userRepo *UserRepository) AddUser(ctx context.Context, inputUser *user.User) (int, error) {
+func (repo *UserRepository) AddUser(ctx context.Context, inputUser *user.User) (int, error) {
 	var id int
 	userState := inputUser.State()
-	err := userRepo.Pool.QueryRow(ctx,
+	err := repo.pool.QueryRow(ctx,
 		`INSERT INTO users (username, email, password) 
 		VALUES ($1, $2, $3)
 		RETURNING user_id`,

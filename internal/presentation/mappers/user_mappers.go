@@ -5,8 +5,8 @@ import (
 	"project/internal/presentation/schemas"
 )
 
-func FromUserInfoDTOToSchema(dto *dtos.UserInfoDTO) *schemas.UserInfoSchema {
-	return &schemas.UserInfoSchema{
+func FromUserInfoDTOToSchema(dto *dtos.UserInfo) *schemas.UserInfo {
+	return &schemas.UserInfo{
 		UserID:    dto.UserID,
 		Username:  dto.Username,
 		UserEmail: dto.UserEmail,

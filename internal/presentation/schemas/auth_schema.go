@@ -1,20 +1,20 @@
 package schemas
 
-type UserCreatedSchema struct {
+type UserCreated struct {
 	UserID int `json:"user_id" example:"1"`
 }
 
-type CreateUserSchema struct {
+type CreateUser struct {
 	Username string `json:"username" example:"maximEZ"`
 	Email    string `json:"email" example:"maxim@mail.ru"`
 	Password string `json:"password" example:"1Q2w3e"`
 }
 
-type AuthorizeSchema struct {
+type Authorize struct {
 	Username string `json:"username" example:"maximEZ"`
 	Password string `json:"password" example:"1Q2w3e"`
 }
 
-type TokensSchema struct {
+type Token struct {
 	AccessToken string `json:"access_token"`
 }

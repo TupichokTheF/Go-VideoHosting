@@ -25,6 +25,6 @@ func JSON(w http.ResponseWriter, status int, payload any, options ...Option) {
 
 // Error - функция, необходимая для отправки ошибки в формате JSON по HTTP.
 // Параметры получает те же, что и функция JSON
-func Error(w http.ResponseWriter, status int, message schemas.ErrorSchema) {
+func Error(w http.ResponseWriter, status int, message schemas.Error) {
 	JSON(w, status, message)
 }

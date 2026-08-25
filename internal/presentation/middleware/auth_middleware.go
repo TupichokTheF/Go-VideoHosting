@@ -14,27 +14,21 @@ func AuthMiddleware(authService app_ports.AuthService) func(next http.Handler) h
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			accessToken := req.Header.Get("Authorization")
 			if !strings.HasPrefix(accessToken, "Bearer ") {
-				errorResponse := schemas.ErrorSchema{Error: "Unauthorized"}
+				errorResponse := schemas.Error{Error: "Unauthorized"}
 				response.Error(w, http.StatusUnauthorized, errorResponse)
 				return
 			}
 
-			refreshToken, err := req.Cookie("refresh_token")
-			if err != nil {
-				errorResponse := schemas.ErrorSchema{Error: "Unauthorized"}
+			accessToken = strings.TrimPrefix(accessToken, "Bearer ")
+			if ok := authService.IsLoggedOut(req.Context(), accessToken); ok {
+				errorResponse := schemas.Error{Error: "Unauthorized"}
 				response.Error(w, http.StatusUnauthorized, errorResponse)
 				return
 			}
 
-			if ok := authService.IsLoggedOut(req.Context(), refreshToken.Value); ok {
-				errorResponse := schemas.ErrorSchema{Error: "Unauthorized"}
-				response.Error(w, http.StatusUnauthorized, errorResponse)
-				return
-			}
-
-			userID, ok := authService.IsAuthorized(req.Context(), strings.TrimPrefix(accessToken, "Bearer "))
+			userID, ok := authService.IsAuthorized(req.Context(), accessToken)
 			if !ok {
-				errorResponse := schemas.ErrorSchema{Error: "Unauthorized"}
+				errorResponse := schemas.Error{Error: "Unauthorized"}
 				response.Error(w, http.StatusUnauthorized, errorResponse)
 				return
 			}

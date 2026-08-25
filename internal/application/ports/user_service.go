@@ -6,5 +6,5 @@ import (
 )
 
 type UserService interface {
-	GetUserInfo(ctx context.Context, userID int) (*dtos.UserInfoDTO, error)
+	GetUserInfo(ctx context.Context, userID int) (*dtos.UserInfo, error)
 }

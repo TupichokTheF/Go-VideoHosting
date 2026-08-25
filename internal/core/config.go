@@ -64,12 +64,13 @@ type JWTConfig struct {
 }
 
 type MinioConfig struct {
-	Host     string `env:"MINIO_HOST" env-required:"true"`
-	Port     int    `env:"MINIO_PORt" env-required:"true"`
-	Bucket   string `env:"MINIO_BUCKET" env-required:"true"`
+	Host     string `env:"MINIO_HOST" env-default:"localhost"`
+	Port     int    `env:"MINIO_PORT" env-default:"9000"`
+	Bucket   string `env:"MINIO_BUCKET" env-default:"videos"`
 	User     string `env:"MINIO_USER" env-required:"true"`
 	Password string `env:"MINIO_PASSWORD" env-required:"true"`
-	UseSSL   bool   `env:"MINIO_SSL" env-required:"true"`
+	TTL time.Duration `env:"MINIO_TTL" env-default:"30m"`
+	UseSSL   bool   `env:"MINIO_SSL" env-default:"false"`
 }
 
 func (cfg *MinioConfig) Endpoint() string {

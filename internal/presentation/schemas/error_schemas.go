@@ -1,5 +1,5 @@
 package schemas
 
-type ErrorSchema struct {
+type Error struct {
 	Error string `json:"error"`
 }

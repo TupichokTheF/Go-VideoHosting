@@ -12,17 +12,19 @@ import (
 type MinioService struct {
 	client *minio.Client
 	bucket string
+	ttl    time.Duration
 }
 
-func NewMinioService(client *minio.Client, bucket string) *MinioService {
+func NewMinioService(client *minio.Client, bucket string, ttl time.Duration) *MinioService {
 	return &MinioService{
 		client: client,
 		bucket: bucket,
+		ttl:    ttl,
 	}
 }
 
-func (service *MinioService) PresignedURLCreate(ctx context.Context, key string, ttl time.Duration) (string, error) {
-	url, err := service.client.PresignedPutObject(ctx, service.bucket, key, ttl)
+func (service *MinioService) PresignedURLCreate(ctx context.Context, key string) (string, error) {
+	url, err := service.client.PresignedPutObject(ctx, service.bucket, key, service.ttl)
 	if err != nil {
 		return "", fmt.Errorf("presign put %q: %w", key, err)
 	}
@@ -30,8 +32,8 @@ func (service *MinioService) PresignedURLCreate(ctx context.Context, key string,
 	return url.String(), nil
 }
 
-func (service *MinioService) PresignedURLGet(ctx context.Context, key string, ttl time.Duration) (string, error) {
-	url, err := service.client.PresignedGetObject(ctx, service.bucket, key, ttl, url.Values{})
+func (service *MinioService) PresignedURLGet(ctx context.Context, key string) (string, error) {
+	url, err := service.client.PresignedGetObject(ctx, service.bucket, key, service.ttl, url.Values{})
 	if err != nil {
 		return "", fmt.Errorf("presign get %q: %w", key, err)
 	}

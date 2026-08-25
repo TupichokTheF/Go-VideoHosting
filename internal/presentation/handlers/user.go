@@ -22,7 +22,7 @@ func NewUserHandler(userService app_ports.UserService) *UserHandler {
 func (handler *UserHandler) UserInfo(w http.ResponseWriter, req *http.Request) {
 	userID, ok := app_context.UserIDFromContext(req.Context())
 	if !ok {
-		errorResponse := schemas.ErrorSchema{Error: "Unauthorized"}
+		errorResponse := schemas.Error{Error: "Unauthorized"}
 		response.Error(w, http.StatusUnauthorized, errorResponse)
 		return
 	}
@@ -30,7 +30,7 @@ func (handler *UserHandler) UserInfo(w http.ResponseWriter, req *http.Request) {
 	result, err := handler.userService.GetUserInfo(req.Context(), userID)
 	if err != nil {
 		status, errorMessage := mappers.FromApplicationToApiError(err)
-		errorResponse := schemas.ErrorSchema{Error: errorMessage}
+		errorResponse := schemas.Error{Error: errorMessage}
 		response.Error(w, status, errorResponse)
 		return
 	}

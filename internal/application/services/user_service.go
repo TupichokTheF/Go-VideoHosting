@@ -5,28 +5,25 @@ import (
 	"fmt"
 	"project/internal/application/dtos"
 	"project/internal/domain/user"
-	infra_ports "project/internal/infrastructure/ports"
 )
 
 type UserService struct {
-	userRepo   user.Repository
-	tokenCache infra_ports.TokenCacheInterface
+	userRepo user.Repository
 }
 
-func NewUserService(userRepo user.Repository, tokenCache infra_ports.TokenCacheInterface) *UserService {
+func NewUserService(userRepo user.Repository) *UserService {
 	return &UserService{
-		userRepo:   userRepo,
-		tokenCache: tokenCache,
+		userRepo: userRepo,
 	}
 }
 
-func (userService *UserService) GetUserInfo(ctx context.Context, userID int) (*dtos.UserInfoDTO, error) {
+func (userService *UserService) GetUserInfo(ctx context.Context, userID int) (*dtos.UserInfo, error) {
 	u, err := userService.userRepo.GetUserByID(ctx, userID)
 	if err != nil {
 		return nil, fmt.Errorf("get user: %w", err)
 	}
 
-	return &dtos.UserInfoDTO{
+	return &dtos.UserInfo{
 		UserID:    u.ID(),
 		Username:  u.Username().String(),
 		UserEmail: u.Email().String(),

@@ -30,9 +30,9 @@ func NewAuthHandler(authService app_ports.AuthService) *AuthHandler {
 // @Router   /auth/register [post]
 func (handler *AuthHandler) CreateUser(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
-	var request schemas.CreateUserSchema
+	var request schemas.CreateUser
 	if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
-		errorResponse := schemas.ErrorSchema{Error: "Invalid request body"}
+		errorResponse := schemas.Error{Error: "Invalid request body"}
 		response.Error(w, http.StatusBadRequest, errorResponse)
 		return
 	}
@@ -40,7 +40,7 @@ func (handler *AuthHandler) CreateUser(w http.ResponseWriter, req *http.Request)
 	result, err := handler.authService.RegisterUser(req.Context(), mappers.FromCreatedSchemaToDTO(&request))
 	if err != nil {
 		status, errorMessage := mappers.FromApplicationToApiError(err)
-		errorResponse := schemas.ErrorSchema{Error: errorMessage}
+		errorResponse := schemas.Error{Error: errorMessage}
 		response.Error(w, status, errorResponse)
 		return
 	}
@@ -59,9 +59,9 @@ func (handler *AuthHandler) CreateUser(w http.ResponseWriter, req *http.Request)
 // @Router   /auth/login [post]
 func (handler *AuthHandler) Authorization(w http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
-	var request schemas.AuthorizeSchema
+	var request schemas.Authorize
 	if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
-		errorResponse := schemas.ErrorSchema{Error: "Invalid request body"}
+		errorResponse := schemas.Error{Error: "Invalid request body"}
 		response.Error(w, http.StatusBadRequest, errorResponse)
 		return
 	}
@@ -69,7 +69,7 @@ func (handler *AuthHandler) Authorization(w http.ResponseWriter, req *http.Reque
 	result, err := handler.authService.AuthorizeUser(req.Context(), mappers.FromAuthorizeSchemaToDTO(&request))
 	if err != nil {
 		status, errorMessage := mappers.FromApplicationToApiError(err)
-		errorResponse := schemas.ErrorSchema{Error: errorMessage}
+		errorResponse := schemas.Error{Error: errorMessage}
 		response.Error(w, status, errorResponse)
 		return
 	}
@@ -92,7 +92,7 @@ func (handler *AuthHandler) Authorization(w http.ResponseWriter, req *http.Reque
 func (handler *AuthHandler) RefreshToken(w http.ResponseWriter, req *http.Request) {
 	token, err := req.Cookie("refresh_token")
 	if err != nil {
-		errorResponse := schemas.ErrorSchema{Error: "Invalid cookie"}
+		errorResponse := schemas.Error{Error: "Invalid cookie"}
 		response.Error(w, http.StatusUnauthorized, errorResponse)
 		return
 	}
@@ -100,7 +100,7 @@ func (handler *AuthHandler) RefreshToken(w http.ResponseWriter, req *http.Reques
 	newToken, err := handler.authService.RefreshToken(req.Context(), token.Value)
 	if err != nil {
 		status, errorMessage := mappers.FromApplicationToApiError(err)
-		errorResponse := schemas.ErrorSchema{Error: errorMessage}
+		errorResponse := schemas.Error{Error: errorMessage}
 		response.Error(w, status, errorResponse)
 		return
 	}
@@ -112,14 +112,14 @@ func (handler *AuthHandler) Logout(w http.ResponseWriter, req *http.Request) {
 	inputToken, err := req.Cookie("refresh_token")
 	if err != nil {
 		status, errorMessage := mappers.FromApplicationToApiError(app_errors.InvalidTokenError)
-		errorResponse := schemas.ErrorSchema{Error: errorMessage}
+		errorResponse := schemas.Error{Error: errorMessage}
 		response.Error(w, status, errorResponse)
 		return
 	}
 
 	if err := handler.authService.Logout(req.Context(), inputToken.Value); err != nil {
 		status, errorMessage := mappers.FromApplicationToApiError(app_errors.InvalidTokenError)
-		errorResponse := schemas.ErrorSchema{Error: errorMessage}
+		errorResponse := schemas.Error{Error: errorMessage}
 		response.Error(w, status, errorResponse)
 		return
 	}

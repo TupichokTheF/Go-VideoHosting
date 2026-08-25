@@ -11,15 +11,15 @@ import (
 
 type AuthService struct {
 	userRepo   user.Repository
-	jwtManager infra_ports.JWTManagerInterface
-	hasher     infra_ports.HasherInterface
-	tokenCache infra_ports.TokenCacheInterface
+	jwtManager infra_ports.JWTManager
+	hasher     infra_ports.Hasher
+	tokenCache infra_ports.TokenCache
 }
 
 func NewAuthService(userRepo user.Repository,
-	jwtManager infra_ports.JWTManagerInterface,
-	hasher infra_ports.HasherInterface,
-	tokenCache infra_ports.TokenCacheInterface) *AuthService {
+	jwtManager infra_ports.JWTManager,
+	hasher infra_ports.Hasher,
+	tokenCache infra_ports.TokenCache) *AuthService {
 	return &AuthService{
 		userRepo:   userRepo,
 		jwtManager: jwtManager,
@@ -28,7 +28,7 @@ func NewAuthService(userRepo user.Repository,
 	}
 }
 
-func (authService *AuthService) RegisterUser(ctx context.Context, userCreateDTO *dtos.UserCreateDTO) (*dtos.UserCreatedDTO, error) {
+func (authService *AuthService) RegisterUser(ctx context.Context, userCreateDTO *dtos.UserCreate) (*dtos.UserCreated, error) {
 	createdUser, err := user.New(userCreateDTO.UserName, userCreateDTO.UserEmail, userCreateDTO.UserPassword, authService.hasher)
 	if err != nil {
 		return nil, fmt.Errorf("Create user: %w", err)
@@ -39,12 +39,12 @@ func (authService *AuthService) RegisterUser(ctx context.Context, userCreateDTO 
 		return nil, fmt.Errorf("Create user: %w", err)
 	}
 
-	return &dtos.UserCreatedDTO{
+	return &dtos.UserCreated{
 		UserId: userID,
 	}, nil
 }
 
-func (authService *AuthService) AuthorizeUser(ctx context.Context, authorizeDTO *dtos.AuthorizeDTO) (*dtos.TokensDTO, error) {
+func (authService *AuthService) AuthorizeUser(ctx context.Context, authorizeDTO *dtos.Authorize) (*dtos.Tokens, error) {
 	u, err := authService.userRepo.GetUserByUsername(ctx, authorizeDTO.Username)
 	if err != nil {
 		return nil, fmt.Errorf("user authorization: %w", err)
@@ -68,13 +68,13 @@ func (authService *AuthService) AuthorizeUser(ctx context.Context, authorizeDTO 
 		return nil, fmt.Errorf("user Authorization: %w", err)
 	}
 
-	return &dtos.TokensDTO{
+	return &dtos.Tokens{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
 }
 
-func (authService *AuthService) RefreshToken(ctx context.Context, token string) (*dtos.TokensDTO, error) {
+func (authService *AuthService) RefreshToken(ctx context.Context, token string) (*dtos.Tokens, error) {
 	userID, err := authService.jwtManager.ParseRefreshToken(token)
 	if err != nil {
 		return nil, fmt.Errorf("refresh token: %w", app_errors.InvalidTokenError)
@@ -85,7 +85,7 @@ func (authService *AuthService) RefreshToken(ctx context.Context, token string) 
 		return nil, fmt.Errorf("user authorization: %w", app_errors.InvalidTokenError)
 	}
 
-	return &dtos.TokensDTO{
+	return &dtos.Tokens{
 		AccessToken: accessToken,
 	}, nil
 }
@@ -106,15 +106,14 @@ func (authService *AuthService) Logout(ctx context.Context, refreshToken string)
 func (authService *AuthService) IsAuthorized(ctx context.Context, accessToken string) (int, bool) {
 	userID, err := authService.jwtManager.ParseAccessToken(accessToken)
 	if err != nil {
-		fmt.Println(err)
 		return 0, false
 	}
 
 	return userID, true
 }
 
-func (authService *AuthService) IsLoggedOut(ctx context.Context, refreshToken string) bool {
-	userID, err := authService.jwtManager.ParseRefreshToken(refreshToken)
+func (authService *AuthService) IsLoggedOut(ctx context.Context, accessToken string) bool {
+	userID, err := authService.jwtManager.ParseAccessToken(accessToken)
 	if err != nil {
 		return true
 	}
