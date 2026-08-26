@@ -1,6 +1,7 @@
 package video
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -65,9 +66,29 @@ func (video *Video) Size() int64 {
 	return video.size
 }
 
-func (video *Video) MarkUploaded(inputSize int64) error {
-	video.status = Uploaded
-	video.size = inputSize
+var transitions = map[Status][]Status{
+	Draft:    {Uploaded, Deleted},
+	Uploaded: {Deleted},
+	Ready:    {Deleted},
+}
+
+func (v *Video) transitionTo(next Status) error {
+	for _, allowed := range transitions[v.status] {
+		if allowed == next {
+			v.status = next
+			return nil
+		}
+	}
+
+	return fmt.Errorf("transition %s to %s: %w", v.status, next, ErrInvalidTransition)
+}
+
+func (v *Video) MarkUploaded(size int64) error {
+	if err := v.transitionTo(Uploaded); err != nil {
+		return err
+	}
+
+	v.size = size
 
 	return nil
 }

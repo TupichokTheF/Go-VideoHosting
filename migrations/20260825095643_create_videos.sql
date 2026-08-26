@@ -11,4 +11,4 @@ CREATE TABLE videos (
 );
 
 -- +goose Down
-DROP TABLE video_statuses, videos CASCADE;
+DROP TABLE videos CASCADE;

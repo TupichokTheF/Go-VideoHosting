@@ -6,6 +6,7 @@ import (
 	app_errors "project/internal/application/errors"
 	"project/internal/domain/user"
 	"project/internal/domain/video"
+	"project/internal/infrastructure/storage"
 )
 
 func FromApplicationToApiError(appError error) (int, string) {
@@ -29,6 +30,8 @@ func FromApplicationToApiError(appError error) (int, string) {
 		return http.StatusForbidden, "Forbidden"
 	case errors.Is(appError, video.ErrVideoNotLoaded):
 		return http.StatusBadRequest, "Video not loaded"
+	case errors.Is(appError, storage.ErrObjectNotFound):
+		return http.StatusNotFound, "Object not found"
 	default:
 		return http.StatusInternalServerError, "Internal server error"
 	}

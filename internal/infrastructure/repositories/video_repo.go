@@ -21,7 +21,7 @@ func NewVideoRepository(pool *pgxpool.Pool) *VideoRepository {
 
 func (repo *VideoRepository) AddVideo(ctx context.Context, video *video.Video) error {
 	state := video.State()
-	err := repo.pool.QueryRow(ctx,
+	_, err := repo.pool.Exec(ctx,
 		`INSERT INTO videos(video_id, owner_id, title, description, status, created_at) 
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING video_id`,
@@ -49,7 +49,7 @@ func (repo *VideoRepository) GetVideoByID(ctx context.Context, videoID uuid.UUID
 func (repo *VideoRepository) UpdateVideo(ctx context.Context, video *video.Video) error {
 	s := video.State()
 	_, err := repo.pool.Exec(ctx,
-		`UPDATE videos SET status = $2, size_bytes = $3
+		`UPDATE videos SET status = $2, size = $3
 		 WHERE video_id = $1`, s.ID, s.Status, s.Size)
 	if err != nil {
 		return fmt.Errorf("update video %s: %w", s.ID, err)
