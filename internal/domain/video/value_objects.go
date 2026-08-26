@@ -35,7 +35,7 @@ func (description Description) String() string {
 
 type Status string
 
-var (
+const (
 	Draft    Status = "draft"
 	Uploaded Status = "uploaded"
 	Ready    Status = "ready"

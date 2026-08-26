@@ -2,18 +2,18 @@ package handlers
 
 import (
 	"net/http"
-	app_ports "project/internal/presentation/ports"
 	"project/internal/presentation/context"
 	"project/internal/presentation/mappers"
+	pres_ports "project/internal/presentation/ports"
 	"project/internal/presentation/response"
 	"project/internal/presentation/schemas"
 )
 
 type UserHandler struct {
-	userService app_ports.UserService
+	userService pres_ports.UserService
 }
 
-func NewUserHandler(userService app_ports.UserService) *UserHandler {
+func NewUserHandler(userService pres_ports.UserService) *UserHandler {
 	return &UserHandler{
 		userService: userService,
 	}

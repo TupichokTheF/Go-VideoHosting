@@ -5,21 +5,21 @@ import (
 	"fmt"
 	"project/internal/application/dtos"
 	app_errors "project/internal/application/errors"
+	app_ports "project/internal/application/ports"
 	"project/internal/domain/user"
-	infra_ports "project/internal/application/ports"
 )
 
 type AuthService struct {
 	userRepo   user.Repository
-	jwtManager infra_ports.JWTManager
+	jwtManager app_ports.JWTManager
 	hasher     user.Hasher
-	tokenCache infra_ports.TokenCache
+	tokenCache app_ports.TokenCache
 }
 
 func NewAuthService(userRepo user.Repository,
-	jwtManager infra_ports.JWTManager,
+	jwtManager app_ports.JWTManager,
 	hasher user.Hasher,
-	tokenCache infra_ports.TokenCache) *AuthService {
+	tokenCache app_ports.TokenCache) *AuthService {
 	return &AuthService{
 		userRepo:   userRepo,
 		jwtManager: jwtManager,
@@ -56,12 +56,12 @@ func (authService *AuthService) AuthorizeUser(ctx context.Context, authorizeDTO 
 
 	accessToken, err := authService.jwtManager.NewAccessToken(u.ID())
 	if err != nil {
-		return nil, fmt.Errorf("user authorization: %w", app_errors.InvalidTokenError)
+		return nil, fmt.Errorf("user authorization: %w", app_errors.ErrInvalidToken)
 	}
 
 	refreshToken, err := authService.jwtManager.NewRefreshToken(u.ID())
 	if err != nil {
-		return nil, fmt.Errorf("user authorization: %w", app_errors.InvalidTokenError)
+		return nil, fmt.Errorf("user authorization: %w", app_errors.ErrInvalidToken)
 	}
 
 	if err := authService.tokenCache.SetRefreshToken(ctx, refreshToken, u.ID()); err != nil {
@@ -77,12 +77,12 @@ func (authService *AuthService) AuthorizeUser(ctx context.Context, authorizeDTO 
 func (authService *AuthService) RefreshToken(ctx context.Context, token string) (*dtos.Tokens, error) {
 	userID, err := authService.jwtManager.ParseRefreshToken(token)
 	if err != nil {
-		return nil, fmt.Errorf("refresh token: %w", app_errors.InvalidTokenError)
+		return nil, fmt.Errorf("refresh token: %w", app_errors.ErrInvalidToken)
 	}
 
 	accessToken, err := authService.jwtManager.NewAccessToken(userID)
 	if err != nil {
-		return nil, fmt.Errorf("user authorization: %w", app_errors.InvalidTokenError)
+		return nil, fmt.Errorf("user authorization: %w", app_errors.ErrInvalidToken)
 	}
 
 	return &dtos.Tokens{
@@ -93,11 +93,11 @@ func (authService *AuthService) RefreshToken(ctx context.Context, token string) 
 func (authService *AuthService) Logout(ctx context.Context, refreshToken string) error {
 	userID, err := authService.jwtManager.ParseRefreshToken(refreshToken)
 	if err != nil {
-		return fmt.Errorf("logout: %w", app_errors.InvalidTokenError)
+		return fmt.Errorf("logout: %w", app_errors.ErrInvalidToken)
 	}
 
 	if err := authService.tokenCache.DeleteToken(ctx, userID); err != nil {
-		return fmt.Errorf("logout: %w", app_errors.InvalidTokenError)
+		return fmt.Errorf("logout: %w", app_errors.ErrInvalidToken)
 	}
 
 	return nil

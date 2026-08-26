@@ -4,18 +4,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	app_ports "project/internal/presentation/ports"
+	"project/internal/application/dtos"
 	app_context "project/internal/presentation/context"
 	"project/internal/presentation/mappers"
+	pres_ports "project/internal/presentation/ports"
 	"project/internal/presentation/response"
 	"project/internal/presentation/schemas"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 type VideoHandler struct {
-	videoService app_ports.VideoService
+	videoService pres_ports.VideoService
 }
 
-func NewVideoHandler(videoService app_ports.VideoService) *VideoHandler {
+func NewVideoHandler(videoService pres_ports.VideoService) *VideoHandler {
 	return &VideoHandler{
 		videoService: videoService,
 	}
@@ -66,4 +70,30 @@ func (handler *VideoHandler) GetVideo(w http.ResponseWriter, req *http.Request) 
 	}
 
 	response.JSON(w, http.StatusOK, mappers.FromPresignedURLDTOToSchema(result))
+}
+
+func (handler *VideoHandler) Complete(w http.ResponseWriter, req *http.Request) {
+	userID, ok := app_context.UserIDFromContext(req.Context())
+	if !ok {
+		errorResponse := schemas.Error{Error: "Unauthorizaed"}
+		response.Error(w, http.StatusUnauthorized, errorResponse)
+		return
+	}
+
+	videoID, err := uuid.Parse(chi.URLParam(req, "video_id"))
+	if err != nil {
+		errorResponse := schemas.Error{Error: "Bad request"}
+		response.Error(w, http.StatusBadRequest, errorResponse)
+		return
+	}
+
+	err = handler.videoService.CompleteVideo(req.Context(), &dtos.CompleteVideo{VideoID: videoID, UserID: userID})
+	if err != nil {
+		status, message := mappers.FromApplicationToApiError(err)
+		errorResponse := schemas.Error{Error: message}
+		response.Error(w, status, errorResponse)
+		return
+	}
+
+	response.JSON(w, http.StatusOK, nil)
 }

@@ -8,6 +8,8 @@ import (
 var (
 	ErrInvalaidTitle      = errors.New("Invalid title of video")
 	ErrInvalidDescription = errors.New("Invalid description of video")
+	ErrNotFound           = errors.New("Video doesn't exist")
+	ErrVideoNotLoaded     = errors.New("Video doesn't loaded")
 )
 
 type ValidationError struct {

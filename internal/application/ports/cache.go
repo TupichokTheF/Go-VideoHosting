@@ -1,4 +1,4 @@
-package infra_ports
+package app_ports
 
 import "context"
 

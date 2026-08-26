@@ -1,13 +1,18 @@
 package video
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type State struct {
-	ID          int
+	ID          uuid.UUID
 	OwnerID     int
 	Title       string
 	Description string
 	Status      string
+	Size        int64
 	CreatedAt   time.Time
 }
 
@@ -18,6 +23,7 @@ func (video *Video) State() *State {
 		Title:       video.Title().String(),
 		Description: video.Description().String(),
 		Status:      string(video.Status()),
+		Size:        video.Size(),
 		CreatedAt:   video.CreatedAt(),
 	}
 }
@@ -29,21 +35,7 @@ func Reconstitute(state *State) *Video {
 		title:       Title{value: state.Title},
 		description: Description{value: state.Description},
 		status:      Status(state.Status),
+		size:        state.Size,
 		createdAt:   state.CreatedAt,
-	}
-}
-
-func (state *State) FromStatusToID() int {
-	switch state.Status {
-	case "draft":
-		return 1
-	case "uploaded":
-		return 2
-	case "ready":
-		return 3
-	case "deleted":
-		return 4
-	default:
-		return -1
 	}
 }

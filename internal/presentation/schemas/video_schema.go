@@ -7,9 +7,10 @@ type CreateVideo struct {
 }
 
 type GetVideo struct {
-	VideoID int `json:"video_id" example:"1"`
+	VideoID string `json:"video_id"`
 }
 
 type PresignedURL struct {
-	URL string `json:"url"`
+	VideoID string `json:"video_id"`
+	URL     string `json:"url"`
 }

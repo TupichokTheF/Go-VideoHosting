@@ -1,7 +1,10 @@
 package dtos
 
+import "github.com/google/uuid"
+
 type PresignedURL struct {
-	URL string
+	VideoID string
+	URL     string
 }
 
 type CreateVideo struct {
@@ -11,5 +14,10 @@ type CreateVideo struct {
 }
 
 type GetVideo struct {
-	VideoID int
+	VideoID string
+}
+
+type CompleteVideo struct {
+	VideoID uuid.UUID
+	UserID  int
 }

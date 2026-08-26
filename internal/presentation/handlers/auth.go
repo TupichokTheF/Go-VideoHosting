@@ -4,17 +4,17 @@ import (
 	"encoding/json"
 	"net/http"
 	app_errors "project/internal/application/errors"
-	app_ports "project/internal/presentation/ports"
 	"project/internal/presentation/mappers"
+	pres_ports "project/internal/presentation/ports"
 	"project/internal/presentation/response"
 	"project/internal/presentation/schemas"
 )
 
 type AuthHandler struct {
-	authService app_ports.AuthService
+	authService pres_ports.AuthService
 }
 
-func NewAuthHandler(authService app_ports.AuthService) *AuthHandler {
+func NewAuthHandler(authService pres_ports.AuthService) *AuthHandler {
 	return &AuthHandler{
 		authService: authService,
 	}
@@ -111,14 +111,14 @@ func (handler *AuthHandler) RefreshToken(w http.ResponseWriter, req *http.Reques
 func (handler *AuthHandler) Logout(w http.ResponseWriter, req *http.Request) {
 	inputToken, err := req.Cookie("refresh_token")
 	if err != nil {
-		status, errorMessage := mappers.FromApplicationToApiError(app_errors.InvalidTokenError)
+		status, errorMessage := mappers.FromApplicationToApiError(app_errors.ErrInvalidToken)
 		errorResponse := schemas.Error{Error: errorMessage}
 		response.Error(w, status, errorResponse)
 		return
 	}
 
 	if err := handler.authService.Logout(req.Context(), inputToken.Value); err != nil {
-		status, errorMessage := mappers.FromApplicationToApiError(app_errors.InvalidTokenError)
+		status, errorMessage := mappers.FromApplicationToApiError(app_errors.ErrInvalidToken)
 		errorResponse := schemas.Error{Error: errorMessage}
 		response.Error(w, status, errorResponse)
 		return

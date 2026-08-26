@@ -1,13 +1,18 @@
 package video
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Video struct {
-	id          int
+	id          uuid.UUID
 	ownerID     int
 	title       Title
 	description Description
 	status      Status
+	size        int64
 	createdAt   time.Time
 }
 
@@ -23,6 +28,7 @@ func New(ownerID int, inputTitle, inputDescription string) (*Video, error) {
 	}
 
 	return &Video{
+		id:          uuid.Must(uuid.NewV7()),
 		ownerID:     ownerID,
 		title:       title,
 		description: description,
@@ -31,7 +37,7 @@ func New(ownerID int, inputTitle, inputDescription string) (*Video, error) {
 	}, nil
 }
 
-func (video *Video) ID() int {
+func (video *Video) ID() uuid.UUID {
 	return video.id
 }
 
@@ -53,4 +59,15 @@ func (video *Video) Status() Status {
 
 func (video *Video) CreatedAt() time.Time {
 	return video.createdAt
+}
+
+func (video *Video) Size() int64 {
+	return video.size
+}
+
+func (video *Video) MarkUploaded(inputSize int64) error {
+	video.status = Uploaded
+	video.size = inputSize
+
+	return nil
 }
