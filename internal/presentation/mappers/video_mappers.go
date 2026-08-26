@@ -7,7 +7,7 @@ import (
 
 func FromCreateVideoSchemaToDTO(schema *schemas.CreateVideo) *dtos.CreateVideo {
 	return &dtos.CreateVideo{
-		OwnerID: schema.OwnerID,
+		OwnerID:     schema.OwnerID,
 		Title:       schema.Title,
 		Description: schema.Description,
 	}
@@ -24,5 +24,3 @@ func FromPresignedURLDTOToSchema(dto *dtos.PresignedURL) *schemas.PresignedURL {
 		URL: dto.URL,
 	}
 }
-
-

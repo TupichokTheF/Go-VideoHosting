@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"project/internal/application/dtos"
 	"project/internal/domain/video"
-	infra_ports "project/internal/infrastructure/ports"
+	infra_ports "project/internal/application/ports"
 	"strconv"
 )
 

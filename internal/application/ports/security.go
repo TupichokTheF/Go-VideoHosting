@@ -6,8 +6,3 @@ type JWTManager interface {
 	ParseAccessToken(inputToken string) (int, error)
 	ParseRefreshToken(inputToken string) (int, error)
 }
-
-type Hasher interface {
-	Hash(password string) (string, error)
-	Verify(password, hash string) bool
-}

@@ -24,7 +24,7 @@ func (repo *VideoRepository) AddVideo(ctx context.Context, video *video.Video) (
 	err := repo.pool.QueryRow(ctx,
 		`INSERT INTO videos(owner_id, title, description, status_id, created_at) 
 		VALUES ($1, $2, $3, $4, $5)
-		RETURNING video_id`, 
+		RETURNING video_id`,
 		state.OwnerID, state.Title, state.Description, state.FromStatusToID(), state.CreatedAt).Scan(&id)
 	if err != nil {
 		return 0, fmt.Errorf("error while adding video: %w", err)

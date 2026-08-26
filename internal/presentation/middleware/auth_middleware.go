@@ -1,15 +1,19 @@
 package app_middleware
 
 import (
+	"context"
 	"net/http"
-	app_ports "project/internal/application/ports"
 	"project/internal/presentation/context"
 	"project/internal/presentation/response"
 	"project/internal/presentation/schemas"
 	"strings"
 )
 
-func AuthMiddleware(authService app_ports.AuthService) func(next http.Handler) http.Handler {
+type AuthManager interface {
+	Authenticate(ctx context.Context, accessToken string) (int, bool)
+}
+
+func AuthMiddleware(authManager AuthManager) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 			accessToken := req.Header.Get("Authorization")
@@ -20,13 +24,7 @@ func AuthMiddleware(authService app_ports.AuthService) func(next http.Handler) h
 			}
 
 			accessToken = strings.TrimPrefix(accessToken, "Bearer ")
-			if ok := authService.IsLoggedOut(req.Context(), accessToken); ok {
-				errorResponse := schemas.Error{Error: "Unauthorized"}
-				response.Error(w, http.StatusUnauthorized, errorResponse)
-				return
-			}
-
-			userID, ok := authService.IsAuthorized(req.Context(), accessToken)
+			userID, ok := authManager.Authenticate(req.Context(), accessToken)
 			if !ok {
 				errorResponse := schemas.Error{Error: "Unauthorized"}
 				response.Error(w, http.StatusUnauthorized, errorResponse)

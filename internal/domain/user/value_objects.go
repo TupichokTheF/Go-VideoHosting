@@ -27,7 +27,7 @@ func (name UserName) String() string {
 
 type UserPassword struct{ value string }
 
-func CreatePassword(value string) (UserPassword, error) {
+func CreatePassword(value string, hasher Hasher) (UserPassword, error) {
 	if utf8.RuneCountInString(value) < 6 {
 		return UserPassword{}, &ValidationError{Field: "password", Reason: "Password is too short"}
 	} else if utf8.RuneCountInString(value) > 30 {
@@ -49,7 +49,12 @@ func CreatePassword(value string) (UserPassword, error) {
 		return UserPassword{}, &ValidationError{Field: "password", Reason: "Password required digit"}
 	}
 
-	return UserPassword{value: value}, nil
+	hashedPass, err := hasher.Hash(value)
+	if err != nil {
+		return UserPassword{}, &ValidationError{Field: "password", Reason: "Password required digit"}
+	}
+
+	return UserPassword{value: hashedPass}, nil
 }
 
 func (pass UserPassword) String() string {

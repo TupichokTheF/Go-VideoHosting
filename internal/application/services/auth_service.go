@@ -6,19 +6,19 @@ import (
 	"project/internal/application/dtos"
 	app_errors "project/internal/application/errors"
 	"project/internal/domain/user"
-	infra_ports "project/internal/infrastructure/ports"
+	infra_ports "project/internal/application/ports"
 )
 
 type AuthService struct {
 	userRepo   user.Repository
 	jwtManager infra_ports.JWTManager
-	hasher     infra_ports.Hasher
+	hasher     user.Hasher
 	tokenCache infra_ports.TokenCache
 }
 
 func NewAuthService(userRepo user.Repository,
 	jwtManager infra_ports.JWTManager,
-	hasher infra_ports.Hasher,
+	hasher user.Hasher,
 	tokenCache infra_ports.TokenCache) *AuthService {
 	return &AuthService{
 		userRepo:   userRepo,
@@ -103,16 +103,20 @@ func (authService *AuthService) Logout(ctx context.Context, refreshToken string)
 	return nil
 }
 
-func (authService *AuthService) IsAuthorized(ctx context.Context, accessToken string) (int, bool) {
-	userID, err := authService.jwtManager.ParseAccessToken(accessToken)
-	if err != nil {
+func (authService *AuthService) Authenticate(ctx context.Context, accessToken string) (int, bool) {
+	if ok := authService.isLoggedOut(ctx, accessToken); !ok {
+		return 0, false
+	}
+
+	userID, ok := authService.isAuthorized(accessToken)
+	if !ok {
 		return 0, false
 	}
 
 	return userID, true
 }
 
-func (authService *AuthService) IsLoggedOut(ctx context.Context, accessToken string) bool {
+func (authService *AuthService) isLoggedOut(ctx context.Context, accessToken string) bool {
 	userID, err := authService.jwtManager.ParseAccessToken(accessToken)
 	if err != nil {
 		return true
@@ -124,4 +128,13 @@ func (authService *AuthService) IsLoggedOut(ctx context.Context, accessToken str
 	}
 
 	return false
+}
+
+func (authService *AuthService) isAuthorized(accessToken string) (int, bool) {
+	userID, err := authService.jwtManager.ParseAccessToken(accessToken)
+	if err != nil {
+		return 0, false
+	}
+
+	return userID, true
 }

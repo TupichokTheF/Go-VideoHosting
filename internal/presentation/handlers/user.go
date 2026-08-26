@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"net/http"
-	app_ports "project/internal/application/ports"
+	app_ports "project/internal/presentation/ports"
 	"project/internal/presentation/context"
 	"project/internal/presentation/mappers"
 	"project/internal/presentation/response"

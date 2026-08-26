@@ -1,7 +1,7 @@
 package routers
 
 import (
-	app_ports "project/internal/application/ports"
+	app_ports "project/internal/presentation/ports"
 	"project/internal/presentation/handlers"
 	"project/internal/presentation/middleware"
 

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	app_ports "project/internal/application/ports"
+	app_ports "project/internal/presentation/ports"
 	app_context "project/internal/presentation/context"
 	"project/internal/presentation/mappers"
 	"project/internal/presentation/response"

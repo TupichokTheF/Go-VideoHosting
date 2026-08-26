@@ -7,24 +7,15 @@ type User struct {
 	userPassword UserPassword
 }
 
-type HasherInterface interface {
-	Hash(password string) (string, error)
-	Verify(password, hash string) bool
-}
-
-func New(inputUserName, inputUserEmail, inputUserPassword string, hasher HasherInterface) (*User, error) {
+func New(inputUserName, inputUserEmail, inputUserPassword string, hasher Hasher) (*User, error) {
 	userName, err := CreateUserName(inputUserName)
 	if err != nil {
 		return nil, err
 	}
 
-	_, err = CreatePassword(inputUserPassword)
+	pass, err := CreatePassword(inputUserPassword, hasher)
 	if err != nil {
 		return nil, err
-	}
-	hashedPass, err := hasher.Hash(inputUserPassword)
-	if err != nil {
-		return nil, InvalidPassword
 	}
 
 	userEmail, err := CreateUserEmail(inputUserEmail)
@@ -34,7 +25,7 @@ func New(inputUserName, inputUserEmail, inputUserPassword string, hasher HasherI
 
 	return &User{
 		userName:     userName,
-		userPassword: UserPassword{value: hashedPass},
+		userPassword: pass,
 		userEmail:    userEmail,
 	}, nil
 }
@@ -55,6 +46,6 @@ func (u *User) ID() int {
 	return u.id
 }
 
-func (u *User) VerifyPassword(raw string, hasher HasherInterface) bool {
+func (u *User) VerifyPassword(raw string, hasher Hasher) bool {
 	return hasher.Verify(raw, u.userPassword.value)
 }
