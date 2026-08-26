@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"project/internal/domain/video"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -44,6 +45,10 @@ func (service *MinioService) PresignedURLGet(ctx context.Context, key string) (s
 func (s *MinioService) Stat(ctx context.Context, key string) (int64, error) {
 	info, err := s.client.StatObject(ctx, s.bucket, key, minio.StatObjectOptions{})
 	if err != nil {
+		if minio.ToErrorResponse(err).Code == "NoSuchKey" {
+			return 0, fmt.Errorf("stat %q: %w", key, video.ErrNotFound)
+		}
+
 		return 0, fmt.Errorf("stat %q: %w", key, err)
 	}
 	return info.Size, nil

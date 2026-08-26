@@ -10,7 +10,7 @@ import (
 
 func FromApplicationToApiError(appError error) (int, string) {
 	var validationErrorUser *user.ValidationError
-	var validationErrorVideo *user.ValidationError
+	var validationErrorVideo *video.ValidationError
 
 	switch {
 	case errors.As(appError, &validationErrorUser):

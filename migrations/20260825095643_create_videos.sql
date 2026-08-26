@@ -6,7 +6,7 @@ CREATE TABLE videos (
 	description TEXT NOT NULL,
 	status VARCHAR(20) NOT NULL DEFAULT 'draft',
 	size BIGINT,
-	created_at TIMESTAMPTZ  NOT NULL DEFAULT now()
+	created_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
 	CONSTRAINT videos_status_check CHECK (status IN ('draft','uploaded','processing','ready','failed','deleted'))
 );
 

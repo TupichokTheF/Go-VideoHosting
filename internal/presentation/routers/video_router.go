@@ -12,7 +12,8 @@ func WithVideoRouter(handler *handlers.VideoHandler, authService app_middleware.
 		router.Route("/video", func(r chi.Router) {
 			r.With(app_middleware.AuthMiddleware(authService)).
 				Post("/add", handler.AddVideo)
-
+			r.With(app_middleware.AuthMiddleware(authService)).
+				Post("/{video_id}/complete", handler.Complete)
 			r.Get("/get", handler.GetVideo)
 		})
 	}
