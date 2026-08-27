@@ -41,8 +41,8 @@ func (service *MinioService) PresignedURLGet(ctx context.Context, key string) (s
 	return url.String(), nil
 }
 
-func (s *MinioService) Stat(ctx context.Context, key string) (int64, error) {
-	info, err := s.client.StatObject(ctx, s.bucket, key, minio.StatObjectOptions{})
+func (service *MinioService) Stat(ctx context.Context, key string) (int64, error) {
+	info, err := service.client.StatObject(ctx, service.bucket, key, minio.StatObjectOptions{})
 	if err != nil {
 		if minio.ToErrorResponse(err).Code == "NoSuchKey" {
 			return 0, fmt.Errorf("stat %q: %w", key, ErrObjectNotFound)

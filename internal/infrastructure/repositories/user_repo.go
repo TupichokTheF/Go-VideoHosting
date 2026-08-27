@@ -53,6 +53,7 @@ func (repo *UserRepository) AddUser(ctx context.Context, inputUser *user.User) (
 		RETURNING user_id`,
 		userState.UserName, userState.UserEmail, userState.UserPassword).Scan(&id)
 	if err != nil {
+		fmt.Println(err)
 		return 0, fmt.Errorf("add user: %w", user.AlreadyExistError)
 	}
 

@@ -81,7 +81,7 @@ func LoadConfig() *Config {
 	err := godotenv.Load()
 
 	if err != nil {
-		log.Fatal("Can't load env file")
+		log.Println("no .env file, reading from environment")
 	}
 
 	var cfg Config
