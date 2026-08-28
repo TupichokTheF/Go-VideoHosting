@@ -32,6 +32,8 @@ func FromApplicationToApiError(appError error) (int, string) {
 		return http.StatusBadRequest, "Video not loaded"
 	case errors.Is(appError, storage.ErrObjectNotFound):
 		return http.StatusNotFound, "Object not found"
+	case errors.Is(appError, app_errors.ErrTokenRevoked):
+		return http.StatusUnauthorized, "Refresh token was revoked"
 	default:
 		return http.StatusInternalServerError, "Internal server error"
 	}

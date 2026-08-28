@@ -5,15 +5,14 @@ import (
 )
 
 type Option func(router chi.Router)
+const prefix string = "/api/v1"
 
 func GetRouter(options ...Option) *chi.Mux {
 	router := chi.NewRouter()
 
-	router.Route("/api/v1", func(r chi.Router) {
-		for _, option := range options {
-			option(r)
-		}
-	})
+	for _, option := range options {
+		option(router)
+	}
 
 	return router
 }

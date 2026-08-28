@@ -3,9 +3,11 @@ package security
 import (
 	"errors"
 	"fmt"
+	app_ports "project/internal/application/ports"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 type JWTManager struct {
@@ -34,7 +36,8 @@ func (manager *JWTManager) NewRefreshToken(userID int) (string, error) {
 
 func (manager *JWTManager) newToken(secret []byte, userID int, ttl time.Duration) (string, error) {
 	claims := jwt.MapClaims{
-		"user_id": userID,
+		"sub": userID,
+		"jti": uuid.NewString(),
 		"iat":     time.Now().Unix(),
 		"exp":     time.Now().Add(ttl).Unix(),
 	}
@@ -44,30 +47,54 @@ func (manager *JWTManager) newToken(secret []byte, userID int, ttl time.Duration
 	return token.SignedString(secret)
 }
 
-func (m *JWTManager) ParseRefreshToken(inputToken string) (int, error) {
+func (m *JWTManager) ParseRefreshToken(inputToken string) (*app_ports.Claims, error) {
 	return m.parseToken(inputToken, m.refreshSecret)
 }
 
-func (m *JWTManager) ParseAccessToken(inputToken string) (int, error) {
+func (m *JWTManager) ParseAccessToken(inputToken string) (*app_ports.Claims, error) {
 	return m.parseToken(inputToken, m.accessSecret)
 }
 
-func (m *JWTManager) parseToken(inputToken string, secret []byte) (int, error) {
+func (m *JWTManager) parseToken(inputToken string, secret []byte) (*app_ports.Claims, error) {
 	token, err := jwt.Parse(inputToken, func(t *jwt.Token) (any, error) {
 		return secret, nil
 	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}))
 	if err != nil {
-		return 0, fmt.Errorf("parse token: %w", err)
+		return nil, fmt.Errorf("parse token: %w", err)
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok || !token.Valid {
-		return 0, errors.New("invalid token")
+		return nil, errors.New("invalid token")
 	}
 
-	raw, ok := claims["user_id"].(float64)
-	if !ok {
-		return 0, errors.New("invalid user_id claim")
-	}
-	return int(raw), nil
+	return m.parseClaims(claims)
 }
+
+func (m *JWTManager) parseClaims(claims jwt.MapClaims) (*app_ports.Claims, error) {
+	userID, ok := claims["sub"].(float64)
+	if !ok {
+		return nil, errors.New("invalid type of userID")
+	}
+
+	expTime, err := claims.GetExpirationTime()
+	if err != nil {
+		return nil, fmt.Errorf("get exp: %w", err)
+	}
+	if expTime == nil {
+		return nil, errors.New("missing exp claim")
+	}
+
+	jti, ok := claims["jti"].(string)
+	if !ok {
+		return nil, errors.New("invalid type of jti")
+	}
+
+	return &app_ports.Claims{
+		UserID: int(userID),
+		Exp: expTime.Time,
+		JTI: jti,
+	}, nil
+}
+
+

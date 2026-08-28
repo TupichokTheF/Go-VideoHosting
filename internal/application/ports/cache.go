@@ -1,9 +1,11 @@
 package app_ports
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type TokenCache interface {
-	SetRefreshToken(ctx context.Context, refresh string, userID int) error
-	DeleteToken(ctx context.Context, userID int) error
-	GetRefreshToken(ctx context.Context, userID int) (string, error)
+	MarkAsRevoked(ctx context.Context, jti string, ttl time.Duration) error
+	IsRevoked(ctx context.Context, jti string) (bool, error)
 }

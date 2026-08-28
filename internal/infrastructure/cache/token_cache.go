@@ -20,34 +20,20 @@ func NewTokenCache(cli *redis.Client, ttl time.Duration) *TokenCache {
 	}
 }
 
-func (cache *TokenCache) SetRefreshToken(ctx context.Context, refresh string, userID int) error {
-	key := fmt.Sprintf("refresh:%v", userID)
+func (cache *TokenCache) MarkAsRevoked(ctx context.Context, jti string, ttl time.Duration) error {
+	key := fmt.Sprintf("revoked:%s", jti)
 
-	if err := cache.client.Set(ctx, key, refresh, cache.refreshTTL).Err(); err != nil {
+	if err := cache.client.Set(ctx, key, "1", ttl).Err(); err != nil {
 		return fmt.Errorf("set refresh token: %w", err)
 	}
 
 	return nil
 }
 
-func (cache *TokenCache) DeleteToken(ctx context.Context, userID int) error {
-	key := fmt.Sprintf("refresh:%v", userID)
-
-	if err := cache.client.Del(ctx, key).Err(); err != nil {
-		return fmt.Errorf("set refresh token: %w", err)
-	}
-
-	return nil
-}
-
-func (cache *TokenCache) GetRefreshToken(ctx context.Context, userID int) (string, error) {
-	key := fmt.Sprintf("refresh:%v", userID)
-
-	value := cache.client.Get(ctx, key)
-	refreshToken, err := value.Val(), value.Err()
+func (cache *TokenCache) IsRevoked(ctx context.Context, jti string) (bool, error) {
+	n, err := cache.client.Exists(ctx, "revoked:"+jti).Result()
 	if err != nil {
-		return "", fmt.Errorf("set refresh token: %w", err)
+		return false, fmt.Errorf("check revoked %s: %w", jti, err)
 	}
-
-	return refreshToken, nil
+	return n == 1, nil
 }

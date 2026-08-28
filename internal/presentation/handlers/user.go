@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"project/internal/presentation/context"
 	"project/internal/presentation/mappers"
@@ -20,6 +21,7 @@ func NewUserHandler(userService pres_ports.UserService) *UserHandler {
 }
 
 func (handler *UserHandler) UserInfo(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("user")
 	userID, ok := app_context.UserIDFromContext(req.Context())
 	if !ok {
 		errorResponse := schemas.Error{Error: "Unauthorized"}

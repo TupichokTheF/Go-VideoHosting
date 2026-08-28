@@ -7,6 +7,7 @@ import (
 	app_errors "project/internal/application/errors"
 	app_ports "project/internal/application/ports"
 	"project/internal/domain/user"
+	"time"
 )
 
 type AuthService struct {
@@ -64,10 +65,6 @@ func (authService *AuthService) AuthorizeUser(ctx context.Context, authorizeDTO 
 		return nil, fmt.Errorf("user authorization: %w", app_errors.ErrInvalidToken)
 	}
 
-	if err := authService.tokenCache.SetRefreshToken(ctx, refreshToken, u.ID()); err != nil {
-		return nil, fmt.Errorf("user Authorization: %w", err)
-	}
-
 	return &dtos.Tokens{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
@@ -75,14 +72,23 @@ func (authService *AuthService) AuthorizeUser(ctx context.Context, authorizeDTO 
 }
 
 func (authService *AuthService) RefreshToken(ctx context.Context, token string) (*dtos.Tokens, error) {
-	userID, err := authService.jwtManager.ParseRefreshToken(token)
+	tokenData, err := authService.jwtManager.ParseRefreshToken(token)
 	if err != nil {
 		return nil, fmt.Errorf("refresh token: %w", app_errors.ErrInvalidToken)
 	}
 
-	accessToken, err := authService.jwtManager.NewAccessToken(userID)
+	ok, err := authService.tokenCache.IsRevoked(ctx, tokenData.JTI)
 	if err != nil {
-		return nil, fmt.Errorf("user authorization: %w", app_errors.ErrInvalidToken)
+		return nil, fmt.Errorf("refresh token: %w", err)
+	}
+	
+	if ok {
+		return nil, app_errors.ErrTokenRevoked
+	}
+
+	accessToken, err := authService.jwtManager.NewAccessToken(tokenData.UserID)
+	if err != nil {
+		return nil, app_errors.ErrInvalidToken
 	}
 
 	return &dtos.Tokens{
@@ -91,50 +97,26 @@ func (authService *AuthService) RefreshToken(ctx context.Context, token string) 
 }
 
 func (authService *AuthService) Logout(ctx context.Context, refreshToken string) error {
-	userID, err := authService.jwtManager.ParseRefreshToken(refreshToken)
+	tokenData, err := authService.jwtManager.ParseRefreshToken(refreshToken)
 	if err != nil {
-		return fmt.Errorf("logout: %w", app_errors.ErrInvalidToken)
+		return fmt.Errorf("logout: %w", err)
 	}
 
-	if err := authService.tokenCache.DeleteToken(ctx, userID); err != nil {
-		return fmt.Errorf("logout: %w", app_errors.ErrInvalidToken)
+	ttl := time.Until(tokenData.Exp)
+
+	if err := authService.tokenCache.MarkAsRevoked(ctx, tokenData.JTI, ttl); err != nil {
+		return fmt.Errorf("logout: %w", err)
 	}
 
 	return nil
 }
 
 func (authService *AuthService) Authenticate(ctx context.Context, accessToken string) (int, bool) {
-	if ok := authService.isLoggedOut(ctx, accessToken); !ok {
-		return 0, false
-	}
+	tokenData, err := authService.jwtManager.ParseAccessToken(accessToken)
 
-	userID, ok := authService.isAuthorized(accessToken)
-	if !ok {
-		return 0, false
-	}
-
-	return userID, true
-}
-
-func (authService *AuthService) isLoggedOut(ctx context.Context, accessToken string) bool {
-	userID, err := authService.jwtManager.ParseAccessToken(accessToken)
-	if err != nil {
-		return true
-	}
-
-	token, err := authService.tokenCache.GetRefreshToken(ctx, userID)
-	if err != nil || token == "" {
-		return true
-	}
-
-	return false
-}
-
-func (authService *AuthService) isAuthorized(accessToken string) (int, bool) {
-	userID, err := authService.jwtManager.ParseAccessToken(accessToken)
 	if err != nil {
 		return 0, false
 	}
 
-	return userID, true
+	return tokenData.UserID, true
 }
