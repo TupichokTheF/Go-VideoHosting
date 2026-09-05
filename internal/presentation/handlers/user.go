@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"project/internal/presentation/context"
 	"project/internal/presentation/mappers"
@@ -21,11 +20,14 @@ func NewUserHandler(userService pres_ports.UserService) *UserHandler {
 }
 
 func (handler *UserHandler) UserInfo(w http.ResponseWriter, req *http.Request) {
-	fmt.Println("user")
+	logger := app_context.LoggerFromContext(req.Context())
+	logger.Info("started user info")
+
 	userID, ok := app_context.UserIDFromContext(req.Context())
 	if !ok {
 		errorResponse := schemas.Error{Error: "Unauthorized"}
 		response.Error(w, http.StatusUnauthorized, errorResponse)
+		logger.Error("error while user info: unauthorized")
 		return
 	}
 
@@ -34,8 +36,10 @@ func (handler *UserHandler) UserInfo(w http.ResponseWriter, req *http.Request) {
 		status, errorMessage := mappers.FromApplicationToApiError(err)
 		errorResponse := schemas.Error{Error: errorMessage}
 		response.Error(w, status, errorResponse)
+		logger.Error("error while user info", "error", err.Error())
 		return
 	}
+	logger.Info("completed user info")
 
 	response.JSON(w, http.StatusOK, mappers.FromUserInfoDTOToSchema(result))
 }

@@ -104,6 +104,10 @@ func (authService *AuthService) Logout(ctx context.Context, refreshToken string)
 
 	ttl := time.Until(tokenData.Exp)
 
+	if ttl <= 0 {
+		return nil
+	}
+
 	if err := authService.tokenCache.MarkAsRevoked(ctx, tokenData.JTI, ttl); err != nil {
 		return fmt.Errorf("logout: %w", err)
 	}

@@ -42,6 +42,8 @@ func start() {
 		log.Fatal(err)
 	}
 
+	logger := core.SetupLogger()
+
 	userRepo := repositories.NewUserRepository(db.ConnPool)
 	videoRepo := repositories.NewVideoRepository(db.ConnPool)
 
@@ -64,12 +66,12 @@ func start() {
 		routers.WithUserRouter(userHandler, authService),
 		routers.WithVideoRouter(videoHandler, authService),
 	}
-
 	if cfg.Swagger {
 		routersOptions = append(routersOptions, routers.WithSwagger())
 	}
 
-	router := routers.GetRouter(routersOptions...)
+	router := routers.GetRouter(logger, routersOptions...)
+
 	if err := http.ListenAndServe(cfg.GetAddress(), router); err != nil {
 		log.Fatal(err.Error())
 	}
