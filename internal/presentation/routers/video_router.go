@@ -9,7 +9,7 @@ import (
 
 func WithVideoRouter(handler *handlers.VideoHandler, authService app_middleware.AuthManager) Option {
 	return func(router chi.Router) {
-		router.Route(prefix + "/video", func(r chi.Router) {
+		router.Route(prefix+"/video", func(r chi.Router) {
 			r.With(app_middleware.AuthMiddleware(authService)).
 				Post("/add", handler.AddVideo)
 			r.With(app_middleware.AuthMiddleware(authService)).

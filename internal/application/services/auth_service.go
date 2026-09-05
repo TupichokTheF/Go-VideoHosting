@@ -81,7 +81,7 @@ func (authService *AuthService) RefreshToken(ctx context.Context, token string) 
 	if err != nil {
 		return nil, fmt.Errorf("refresh token: %w", err)
 	}
-	
+
 	if ok {
 		return nil, app_errors.ErrTokenRevoked
 	}

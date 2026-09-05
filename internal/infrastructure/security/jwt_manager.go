@@ -38,8 +38,8 @@ func (manager *JWTManager) newToken(secret []byte, userID int, ttl time.Duration
 	claims := jwt.MapClaims{
 		"sub": userID,
 		"jti": uuid.NewString(),
-		"iat":     time.Now().Unix(),
-		"exp":     time.Now().Add(ttl).Unix(),
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(ttl).Unix(),
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -92,9 +92,7 @@ func (m *JWTManager) parseClaims(claims jwt.MapClaims) (*app_ports.Claims, error
 
 	return &app_ports.Claims{
 		UserID: int(userID),
-		Exp: expTime.Time,
-		JTI: jti,
+		Exp:    expTime.Time,
+		JTI:    jti,
 	}, nil
 }
-
-

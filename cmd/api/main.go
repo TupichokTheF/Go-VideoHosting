@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"log/slog"
 	"net/http"
 	"project/internal/application/services"
 	"project/internal/core"
@@ -43,6 +44,7 @@ func start() {
 	}
 
 	logger := core.SetupLogger()
+	slog.SetDefault(logger)
 
 	userRepo := repositories.NewUserRepository(db.ConnPool)
 	videoRepo := repositories.NewVideoRepository(db.ConnPool)
@@ -70,7 +72,7 @@ func start() {
 		routersOptions = append(routersOptions, routers.WithSwagger())
 	}
 
-	router := routers.GetRouter(logger, routersOptions...)
+	router := routers.GetRouter(routersOptions...)
 
 	if err := http.ListenAndServe(cfg.GetAddress(), router); err != nil {
 		log.Fatal(err.Error())

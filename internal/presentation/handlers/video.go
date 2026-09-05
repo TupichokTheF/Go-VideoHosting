@@ -27,7 +27,6 @@ func NewVideoHandler(videoService pres_ports.VideoService) *VideoHandler {
 
 func (handler *VideoHandler) AddVideo(w http.ResponseWriter, req *http.Request) {
 	logger := app_context.LoggerFromContext(req.Context())
-	logger.Info("started add video")
 
 	userID, ok := app_context.UserIDFromContext(req.Context())
 	if !ok {
@@ -41,7 +40,7 @@ func (handler *VideoHandler) AddVideo(w http.ResponseWriter, req *http.Request) 
 	if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
 		errorResponse := schemas.Error{Error: "Invalid request body"}
 		response.Error(w, http.StatusBadRequest, errorResponse)
-		logger.Error("erorr whiel adding video", "error", err.Error())
+		logger.Error("erorr whiel adding video", "error", err)
 		return
 	}
 
@@ -50,23 +49,21 @@ func (handler *VideoHandler) AddVideo(w http.ResponseWriter, req *http.Request) 
 		status, messsage := mappers.FromApplicationToApiError(err)
 		errorResponse := schemas.Error{Error: messsage}
 		response.Error(w, status, errorResponse)
-		logger.Error("erorr whiel adding video", "error", err.Error())
+		logger.Error("erorr whiel adding video", "error", err)
 		return
 	}
-	logger.Info("completed adding video")
 
 	response.JSON(w, http.StatusOK, mappers.FromPresignedURLDTOToSchema(result))
 }
 
 func (handler *VideoHandler) GetVideo(w http.ResponseWriter, req *http.Request) {
 	logger := app_context.LoggerFromContext(req.Context())
-	logger.Info("started getting video")
 
 	var request schemas.GetVideo
 	if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
 		errorResponse := schemas.Error{Error: "Invalid request body"}
 		response.Error(w, http.StatusBadRequest, errorResponse)
-		logger.Error("error while getting video", "error", err.Error())
+		logger.Error("error while getting video", "error", err)
 		return
 	}
 
@@ -76,17 +73,15 @@ func (handler *VideoHandler) GetVideo(w http.ResponseWriter, req *http.Request) 
 		status, message := mappers.FromApplicationToApiError(err)
 		errorResponse := schemas.Error{Error: message}
 		response.Error(w, status, errorResponse)
-		logger.Error("error while getting video", "error", err.Error())
+		logger.Error("error while getting video", "error", err)
 		return
 	}
-	logger.Info("completed getting video")
 
 	response.JSON(w, http.StatusOK, mappers.FromPresignedURLDTOToSchema(result))
 }
 
 func (handler *VideoHandler) Complete(w http.ResponseWriter, req *http.Request) {
 	logger := app_context.LoggerFromContext(req.Context())
-	logger.Info("started completing video")
 
 	userID, ok := app_context.UserIDFromContext(req.Context())
 	if !ok {
@@ -100,7 +95,7 @@ func (handler *VideoHandler) Complete(w http.ResponseWriter, req *http.Request) 
 	if err != nil {
 		errorResponse := schemas.Error{Error: "Bad request"}
 		response.Error(w, http.StatusBadRequest, errorResponse)
-		logger.Error("error while completing video", "error", err.Error())
+		logger.Error("error while completing video", "error", err)
 		return
 	}
 
@@ -109,10 +104,9 @@ func (handler *VideoHandler) Complete(w http.ResponseWriter, req *http.Request) 
 		status, message := mappers.FromApplicationToApiError(err)
 		errorResponse := schemas.Error{Error: message}
 		response.Error(w, status, errorResponse)
-		logger.Error("error while completing video", "error", err.Error())
+		logger.Error("error while completing video", "error", err)
 		return
 	}
-	logger.Info("completed completing video")
 
 	response.JSON(w, http.StatusOK, nil)
 }

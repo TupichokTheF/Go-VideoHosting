@@ -21,7 +21,6 @@ func NewUserHandler(userService pres_ports.UserService) *UserHandler {
 
 func (handler *UserHandler) UserInfo(w http.ResponseWriter, req *http.Request) {
 	logger := app_context.LoggerFromContext(req.Context())
-	logger.Info("started user info")
 
 	userID, ok := app_context.UserIDFromContext(req.Context())
 	if !ok {
@@ -36,10 +35,9 @@ func (handler *UserHandler) UserInfo(w http.ResponseWriter, req *http.Request) {
 		status, errorMessage := mappers.FromApplicationToApiError(err)
 		errorResponse := schemas.Error{Error: errorMessage}
 		response.Error(w, status, errorResponse)
-		logger.Error("error while user info", "error", err.Error())
+		logger.Error("error while user info", "error", err)
 		return
 	}
-	logger.Info("completed user info")
 
 	response.JSON(w, http.StatusOK, mappers.FromUserInfoDTOToSchema(result))
 }
