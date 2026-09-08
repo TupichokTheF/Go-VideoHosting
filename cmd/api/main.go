@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"project/internal/application/services"
 	"project/internal/core"
+	app_kafka "project/internal/infrastructure/brokers/kafka"
 	"project/internal/infrastructure/cache"
 	"project/internal/infrastructure/database/postgres"
 	app_redis "project/internal/infrastructure/database/redis"
@@ -54,6 +55,12 @@ func start() {
 	jwtManager := security.NewJWTManager(cfg.AccessSecretKey, cfg.RefreshSecretKey, cfg.AccessTTL, cfg.RefreshTTL)
 	hasher := security.NewBcryptHasher()
 	videoStorage := storage.NewMinioService(minioClient, cfg.MinioConfig.Bucket, cfg.MinioConfig.TTL)
+
+	kafkaProducer := app_kafka.NewProducer(&cfg.KafkaConfig)
+	defer func() {
+		err := app_kafka.CloseProducer(kafkaProducer)
+		logger.Error("closing of kafka producer completed with error", "error", err)
+	}()
 
 	userService := services.NewUserService(userRepo)
 	authService := services.NewAuthService(userRepo, jwtManager, hasher, tokenCache)

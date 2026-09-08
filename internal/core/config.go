@@ -17,6 +17,7 @@ type Config struct {
 	LocalConfig
 	JWTConfig
 	MinioConfig
+	KafkaConfig
 }
 
 type HTTPConfig struct {
@@ -74,6 +75,15 @@ type MinioConfig struct {
 }
 
 func (cfg *MinioConfig) Endpoint() string {
+	return fmt.Sprintf("%s:%v", cfg.Host, cfg.Port)
+}
+
+type KafkaConfig struct {
+	Port int	`env:"KAFKA_PORT" env-default:"9092"`
+	Host string `env:"KAFKA_HOST" env-default:"localhost"`
+}
+
+func (cfg *KafkaConfig) Address() string {
 	return fmt.Sprintf("%s:%v", cfg.Host, cfg.Port)
 }
 

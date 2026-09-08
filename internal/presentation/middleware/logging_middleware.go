@@ -18,7 +18,7 @@ func Logging(next http.Handler) http.Handler {
 		req = req.WithContext(ctx)
 
 		start := time.Now()
-		next.ServeHTTP(w, req)
+		next.ServeHTTP(ww, req)
 
 		logger.Info("request",
 			"method", req.Method,
