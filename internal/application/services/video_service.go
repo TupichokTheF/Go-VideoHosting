@@ -3,21 +3,26 @@ package services
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"project/internal/application/dtos"
 	app_errors "project/internal/application/errors"
 	app_ports "project/internal/application/ports"
+	"project/internal/domain/event"
 	"project/internal/domain/video"
+	"time"
 )
 
 type VideoService struct {
 	videoRepo    video.Repository
 	videoStorage app_ports.Storage
+	publisher app_ports.Publisher
 }
 
-func NewVideoService(videoRepo video.Repository, videoStorage app_ports.Storage) *VideoService {
+func NewVideoService(videoRepo video.Repository, videoStorage app_ports.Storage, publisher app_ports.Publisher) *VideoService {
 	return &VideoService{
 		videoRepo:    videoRepo,
 		videoStorage: videoStorage,
+		publisher: publisher,
 	}
 }
 
@@ -27,7 +32,8 @@ func (videoService *VideoService) CreateVideo(ctx context.Context, videoData *dt
 		return nil, fmt.Errorf("create video: %w", err)
 	}
 
-	if err := videoService.videoRepo.AddVideo(ctx, newVideo); err != nil {
+	video_id, err := videoService.videoRepo.AddVideo(ctx, newVideo)
+	if err != nil {
 		return nil, fmt.Errorf("create video: %w", err)
 	}
 
@@ -37,7 +43,7 @@ func (videoService *VideoService) CreateVideo(ctx context.Context, videoData *dt
 	}
 
 	return &dtos.PresignedURL{
-		VideoID: newVideo.ID().String(),
+		VideoID: video_id,
 		URL:     url,
 	}, nil
 }
@@ -76,8 +82,20 @@ func (videoService *VideoService) CompleteVideo(ctx context.Context, completeVid
 		return fmt.Errorf("complete video: %w", err)
 	}
 
+	var recorder event.Recorder
+
 	if err := videoService.videoRepo.UpdateVideo(ctx, v); err != nil {
 		return fmt.Errorf("complete video: %w", err)
+	}
+
+	uploadedEvent := video.UploadedEvent{
+		Base: event.Base{CreatedAt: time.Now()},
+		VideoID: v.ID(),
+		OwnerID: v.OwnerID(),
+	}
+	recorder.Add(uploadedEvent)
+	if err := videoService.publisher.PublicEvents(ctx, recorder.Pull()); err != nil {
+		slog.Error("error from kafka while public events", "error", err)
 	}
 
 	return nil

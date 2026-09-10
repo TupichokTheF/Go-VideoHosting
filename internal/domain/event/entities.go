@@ -1,8 +1,13 @@
 package event
 
+import "time"
 
 type Base struct {
-	CreatedAt int64
+	CreatedAt time.Time
+}
+
+func (b Base) OccuredAt() time.Time {
+	return b.CreatedAt
 }
 
 type Recorder struct {
@@ -16,6 +21,6 @@ func (r *Recorder) Add(event Interface) {
 func (r *Recorder) Pull() []Interface {
 	events := r.events
 	r.events = nil
-	
+
 	return events
 }

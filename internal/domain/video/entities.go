@@ -16,7 +16,7 @@ type Video struct {
 	status      Status
 	size        int64
 	createdAt   time.Time
-	events []event.Interface
+	events      []event.Interface
 }
 
 func New(ownerID int, inputTitle, inputDescription string) (*Video, error) {

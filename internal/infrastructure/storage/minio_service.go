@@ -50,5 +50,6 @@ func (service *MinioService) Stat(ctx context.Context, key string) (int64, error
 
 		return 0, fmt.Errorf("stat %q: %w", key, err)
 	}
+
 	return info.Size, nil
 }

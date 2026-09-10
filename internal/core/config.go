@@ -79,7 +79,7 @@ func (cfg *MinioConfig) Endpoint() string {
 }
 
 type KafkaConfig struct {
-	Port int	`env:"KAFKA_PORT" env-default:"9092"`
+	Port int    `env:"KAFKA_PORT" env-default:"9092"`
 	Host string `env:"KAFKA_HOST" env-default:"localhost"`
 }
 

@@ -19,17 +19,20 @@ func NewVideoRepository(pool *pgxpool.Pool) *VideoRepository {
 	}
 }
 
-func (repo *VideoRepository) AddVideo(ctx context.Context, video *video.Video) error {
+func (repo *VideoRepository) AddVideo(ctx context.Context, video *video.Video) (string, error) {
+	var video_id string
+
 	state := video.State()
-	_, err := repo.pool.Exec(ctx,
+	err := repo.pool.QueryRow(ctx,
 		`INSERT INTO videos(video_id, owner_id, title, description, status, created_at) 
-		VALUES ($1, $2, $3, $4, $5, $6)`,
-		state.ID, state.OwnerID, state.Title, state.Description, state.Status, state.CreatedAt)
+		VALUES ($1, $2, $3, $4, $5, $6)
+		RETURNING video_id`,
+		state.ID, state.OwnerID, state.Title, state.Description, state.Status, state.CreatedAt).Scan(&video_id)
 	if err != nil {
-		return fmt.Errorf("error while adding video: %w", err)
+		return "", fmt.Errorf("error while adding video: %w", err)
 	}
 
-	return nil
+	return video_id, nil
 }
 
 func (repo *VideoRepository) GetVideoByID(ctx context.Context, videoID uuid.UUID) (*video.Video, error) {

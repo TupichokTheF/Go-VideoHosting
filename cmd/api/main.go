@@ -10,6 +10,7 @@ import (
 	"project/internal/infrastructure/cache"
 	"project/internal/infrastructure/database/postgres"
 	app_redis "project/internal/infrastructure/database/redis"
+	"project/internal/infrastructure/messaging"
 	"project/internal/infrastructure/repositories"
 	"project/internal/infrastructure/security"
 	"project/internal/infrastructure/storage"
@@ -61,10 +62,11 @@ func start() {
 		err := app_kafka.CloseProducer(kafkaProducer)
 		logger.Error("closing of kafka producer completed with error", "error", err)
 	}()
+	kafkaPublisher := messaging.NewPublisher(kafkaProducer)
 
 	userService := services.NewUserService(userRepo)
 	authService := services.NewAuthService(userRepo, jwtManager, hasher, tokenCache)
-	videoService := services.NewVideoService(videoRepo, videoStorage)
+	videoService := services.NewVideoService(videoRepo, videoStorage, kafkaPublisher)
 
 	authHandler := handlers.NewAuthHandler(authService)
 	userHandler := handlers.NewUserHandler(userService)

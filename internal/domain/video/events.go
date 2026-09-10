@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-
 type UploadedEvent struct {
 	event.Base
 	VideoID uuid.UUID
