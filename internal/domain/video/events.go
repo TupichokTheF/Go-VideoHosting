@@ -13,12 +13,12 @@ type UploadedEvent struct {
 }
 
 func (_ UploadedEvent) EventName() string {
-	return "video.topic"
+	return "video.uploaded"
 }
 
 func (event UploadedEvent) Payload() map[string]any {
 	return map[string]any{
-		"video.id": event.VideoID,
-		"owner.id": event.OwnerID,
+		"video_id": event.VideoID,
+		"owner_id": event.OwnerID,
 	}
 }

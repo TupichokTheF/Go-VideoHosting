@@ -7,11 +7,11 @@ import (
 )
 
 func NewProducer(cfg *core.KafkaConfig) *kafka.Writer {
-	kafkaConfig := kafka.WriterConfig{
-		Brokers: []string{cfg.Address()},
+	writer := &kafka.Writer{
+		Addr:                   kafka.TCP(cfg.Address()),
+		AllowAutoTopicCreation: true,
+		RequiredAcks:           kafka.RequireAll,
 	}
-
-	writer := kafka.NewWriter(kafkaConfig)
 
 	return writer
 }

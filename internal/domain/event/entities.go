@@ -6,7 +6,7 @@ type Base struct {
 	CreatedAt time.Time
 }
 
-func (b Base) OccuredAt() time.Time {
+func (b Base) OccurredAt() time.Time {
 	return b.CreatedAt
 }
 

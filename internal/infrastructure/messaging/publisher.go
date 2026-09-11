@@ -36,7 +36,7 @@ func (p *Publisher) PublicEvents(ctx context.Context, events []event.Interface) 
 		messages = append(messages, kafka.Message{
 			Topic: p.topicFromEventName(event.EventName()),
 			Value: body,
-			Time: event.OccuredAt(),
+			Time:  event.OccurredAt(),
 		})
 	}
 

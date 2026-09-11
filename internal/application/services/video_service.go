@@ -15,14 +15,14 @@ import (
 type VideoService struct {
 	videoRepo    video.Repository
 	videoStorage app_ports.Storage
-	publisher app_ports.Publisher
+	publisher    app_ports.Publisher
 }
 
 func NewVideoService(videoRepo video.Repository, videoStorage app_ports.Storage, publisher app_ports.Publisher) *VideoService {
 	return &VideoService{
 		videoRepo:    videoRepo,
 		videoStorage: videoStorage,
-		publisher: publisher,
+		publisher:    publisher,
 	}
 }
 
@@ -82,19 +82,16 @@ func (videoService *VideoService) CompleteVideo(ctx context.Context, completeVid
 		return fmt.Errorf("complete video: %w", err)
 	}
 
-	var recorder event.Recorder
-
 	if err := videoService.videoRepo.UpdateVideo(ctx, v); err != nil {
 		return fmt.Errorf("complete video: %w", err)
 	}
 
 	uploadedEvent := video.UploadedEvent{
-		Base: event.Base{CreatedAt: time.Now()},
+		Base:    event.Base{CreatedAt: time.Now()},
 		VideoID: v.ID(),
 		OwnerID: v.OwnerID(),
 	}
-	recorder.Add(uploadedEvent)
-	if err := videoService.publisher.PublicEvents(ctx, recorder.Pull()); err != nil {
+	if err := videoService.publisher.PublicEvents(ctx, []event.Interface{uploadedEvent}); err != nil {
 		slog.Error("error from kafka while public events", "error", err)
 	}
 

@@ -22,6 +22,6 @@ func FromGetVideoSchemaToDTO(schema *schemas.GetVideo) *dtos.GetVideo {
 func FromPresignedURLDTOToSchema(dto *dtos.PresignedURL) *schemas.PresignedURL {
 	return &schemas.PresignedURL{
 		VideoID: dto.VideoID,
-		URL: dto.URL,
+		URL:     dto.URL,
 	}
 }
