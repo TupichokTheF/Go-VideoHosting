@@ -1,6 +1,6 @@
 services:
   api:
-    build: .
+    build: ./services/api
     container_name: videohosting-api
     environment:
       DB_HOST: postgres
@@ -19,7 +19,7 @@ services:
       kafka: { condition: service_healthy }
 
   migrate:
-    build: .
+    build: ./services/api
     entrypoint: ["/app/migrate"]
     env_file: .env
     environment:
