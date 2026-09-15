@@ -13,9 +13,9 @@ type Consumer struct {
 
 func NewConsumer(cfg *core.KafkaConfig) *Consumer {
 	reader := kafka.NewReader(kafka.ReaderConfig{
-		Brokers: []string{cfg.Address()},
-		GroupID: strconv.Itoa(cfg.GroupID),
-		GroupTopics: cfg.Topics(),
+		Brokers:     []string{cfg.Address()},
+		GroupID:     strconv.Itoa(cfg.GroupID),
+		GroupTopics: cfg.Topics,
 	})
 
 	return &Consumer{
@@ -30,4 +30,3 @@ func (consumer *Consumer) FetchMessage() error {
 func (c *Consumer) Close() error {
 	return c.reader.Close()
 }
-

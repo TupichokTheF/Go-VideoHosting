@@ -8,25 +8,19 @@ import (
 	"github.com/joho/godotenv"
 )
 
-
 type Config struct {
 	KafkaConfig
 }
 
 type KafkaConfig struct {
-	Host string `env:"KAFKA_HOST" env-default:"localhost"`
-	Port int `env:"KAFKA_PORT" env-default:"9092"`
-	GroupID int `env:"KAFKA_GROUP_ID" env-default:"1"`
+	Host    string   `env:"KAFKA_HOST" env-default:"localhost"`
+	Port    int      `env:"KAFKA_PORT" env-default:"9092"`
+	GroupID int      `env:"KAFKA_GROUP_ID" env-default:"transcoding"`
+	Topics  []string `env:"KAFKA_TOPICS" env-separator:"," env-default:"video.events"`
 }
 
 func (cfg *KafkaConfig) Address() string {
 	return fmt.Sprintf("%s:%v", cfg.Host, cfg.Port)
-}
-
-func (cfg *KafkaConfig) Topics() []string {
-	return []string{
-		"video.events",
-	}
 }
 
 func LoadConfig() *Config {

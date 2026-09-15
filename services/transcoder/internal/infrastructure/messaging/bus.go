@@ -1,20 +1,17 @@
 package messaging
 
+import "transcoder/internal/presentation/events"
 
 type Bus struct {
 	consumer consumerInterface
-	handlers map[string]handlerInterface
+	handlers events.EventsManager
 }
 
 type consumerInterface interface {
 	FetchMessage() error
 }
 
-type handlerInterface interface {
-	Handle() error
-}
-
-func NewBus(consumer consumerInterface, handlers map[string]handlerInterface) *Bus {
+func NewBus(consumer consumerInterface, handlers events.EventsManager) *Bus {
 	return &Bus{
 		consumer: consumer,
 		handlers: handlers,
