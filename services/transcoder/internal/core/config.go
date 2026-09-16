@@ -15,7 +15,7 @@ type Config struct {
 type KafkaConfig struct {
 	Host    string   `env:"KAFKA_HOST" env-default:"localhost"`
 	Port    int      `env:"KAFKA_PORT" env-default:"9092"`
-	GroupID int      `env:"KAFKA_GROUP_ID" env-default:"transcoding"`
+	GroupID string   `env:"KAFKA_GROUP_ID" env-default:"transcoding"`
 	Topics  []string `env:"KAFKA_TOPICS" env-separator:"," env-default:"video.events"`
 }
 

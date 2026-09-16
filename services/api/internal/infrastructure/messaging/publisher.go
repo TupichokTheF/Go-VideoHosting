@@ -37,6 +37,9 @@ func (p *Publisher) PublishEvents(ctx context.Context, events []event.Interface)
 			Topic: p.topicFromEventName(event.EventName()),
 			Value: body,
 			Time:  event.OccurredAt(),
+			Headers: []kafka.Header{
+				{Key: "event_type", Value: []byte(event.EventName())},
+			},
 		})
 	}
 

@@ -26,6 +26,16 @@ func start() {
 		}
 	}()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go func() {
+		if err := kafkaConsumer.StartReading(ctx); err != nil {
+			slog.Error("error while starting reading messages from kafka", "error", err)
+			cancel()
+		}
+	}()
+
 	videoUploadedService := services.NewVideoUploadedService()
 
 	videoUploadedHandler := handlers.NewVideoUploadedHandler(videoUploadedService)
@@ -37,7 +47,7 @@ func start() {
 	eventsManager := events.NewEventsManager(eventsHandlers...)
 
 	bus := messaging.NewBus(kafkaConsumer, eventsManager)
-	if err := bus.Listen(context.Background()); err != nil {
+	if err := bus.Listen(ctx); err != nil {
 		log.Fatal("error while starting listen messages")
 	}
 }

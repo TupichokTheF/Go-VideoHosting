@@ -49,6 +49,8 @@ func (bus *Bus) processMessage(ctx context.Context, msg app_ports.Message) {
 			return
 		}
 
-		msg.Callback(ctx)
+		if err := msg.Callback(ctx); err != nil {
+			slog.Error("error while commiting message", "error", err)
+		}
 	}()
 }

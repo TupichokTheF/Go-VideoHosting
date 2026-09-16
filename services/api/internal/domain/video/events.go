@@ -18,8 +18,7 @@ func (_ UploadedEvent) EventName() string {
 
 func (event UploadedEvent) Payload() map[string]any {
 	return map[string]any{
-		"video_id":   event.VideoID,
-		"owner_id":   event.OwnerID,
-		"event_name": event.EventName(),
+		"video_id": event.VideoID,
+		"owner_id": event.OwnerID,
 	}
 }

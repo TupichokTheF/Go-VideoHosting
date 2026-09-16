@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	"strconv"
 	app_ports "transcoder/internal/application/ports"
 	"transcoder/internal/core"
 
@@ -21,7 +20,7 @@ type Consumer struct {
 func NewConsumer(cfg *core.KafkaConfig) *Consumer {
 	reader := kafka.NewReader(kafka.ReaderConfig{
 		Brokers:     []string{cfg.Address()},
-		GroupID:     strconv.Itoa(cfg.GroupID),
+		GroupID:     cfg.GroupID,
 		GroupTopics: cfg.Topics,
 	})
 
@@ -37,9 +36,9 @@ func (consumer *Consumer) FetchMessage() <-chan app_ports.Message {
 
 func (consumer *Consumer) StartReading(ctx context.Context) error {
 	for {
-		kafkaMsg, err := consumer.reader.ReadMessage(ctx)
+		kafkaMsg, err := consumer.reader.FetchMessage(ctx)
 		if err != nil {
-			close(consumer.msgChan)
+			consumer.msgChan = nil
 			return fmt.Errorf("error while reading messages from kafka: %w", err)
 		}
 
@@ -50,7 +49,7 @@ func (consumer *Consumer) StartReading(ctx context.Context) error {
 		}
 
 		msg := app_ports.Message{
-			Type:    string(kafkaMsg.Value),
+			Type:    typeOfMessage(&kafkaMsg),
 			Payload: payload,
 			Callback: func(ctx context.Context) error {
 				if err := consumer.reader.CommitMessages(ctx, kafkaMsg); err != nil {
@@ -67,4 +66,14 @@ func (consumer *Consumer) StartReading(ctx context.Context) error {
 
 func (c *Consumer) Close() error {
 	return c.reader.Close()
+}
+
+func typeOfMessage(msg *kafka.Message) string {
+	for _, header := range msg.Headers {
+		if header.Key == "event_type" {
+			return string(header.Value)
+		}
+	}
+
+	return ""
 }
