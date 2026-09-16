@@ -20,7 +20,7 @@ func NewPublisher(producer *kafka.Writer) *Publisher {
 	}
 }
 
-func (p *Publisher) PublicEvents(ctx context.Context, events []event.Interface) error {
+func (p *Publisher) PublishEvents(ctx context.Context, events []event.Interface) error {
 	if len(events) == 0 {
 		return nil
 	}

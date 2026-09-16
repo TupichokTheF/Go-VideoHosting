@@ -6,5 +6,5 @@ import (
 )
 
 type Publisher interface {
-	PublicEvents(ctx context.Context, events []event.Interface) error
+	PublishEvents(ctx context.Context, events []event.Interface) error
 }

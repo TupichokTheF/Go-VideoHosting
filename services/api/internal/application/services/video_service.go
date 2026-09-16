@@ -91,7 +91,7 @@ func (videoService *VideoService) CompleteVideo(ctx context.Context, completeVid
 		VideoID: v.ID(),
 		OwnerID: v.OwnerID(),
 	}
-	if err := videoService.publisher.PublicEvents(ctx, []event.Interface{uploadedEvent}); err != nil {
+	if err := videoService.publisher.PublishEvents(ctx, []event.Interface{uploadedEvent}); err != nil {
 		slog.Error("error from kafka while public events", "error", err)
 	}
 
