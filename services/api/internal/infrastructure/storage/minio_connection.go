@@ -27,7 +27,7 @@ func NewMinioClient(cfg *core.MinioConfig) (*minio.Client, error) {
 		return nil, fmt.Errorf("check bucket: %w", err)
 	}
 	if !exists {
-		if err := client.MakeBucket(ctx, "videos", minio.MakeBucketOptions{}); err != nil {
+		if err := client.MakeBucket(ctx, cfg.Bucket, minio.MakeBucketOptions{}); err != nil {
 			return nil, fmt.Errorf("create bucket: %w", err)
 		}
 	}

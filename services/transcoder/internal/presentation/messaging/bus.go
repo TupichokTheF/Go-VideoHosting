@@ -4,25 +4,35 @@ import (
 	"context"
 	"log/slog"
 	"sync"
-	app_ports "transcoder/internal/application/ports"
-	"transcoder/internal/presentation/events"
 )
 
 type Bus struct {
-	consumer consumerInterface
-	handlers events.EventsManager
-	wg sync.WaitGroup
+	consumer  consumerInterface
+	handlers  map[string]Handler
+	wg        sync.WaitGroup
 	semaphore chan struct{}
 }
 
 type consumerInterface interface {
-	FetchMessage() <-chan app_ports.Message
+	FetchMessage() <-chan Message
 }
 
-func NewBus(consumer consumerInterface, handlers events.EventsManager) *Bus {
+type Handler interface {
+	Handle(ctx context.Context, msg Message) error
+}
+
+type Message struct {
+	Type     string
+	Payload  map[string]any
+	Callback CommitMessage
+}
+
+type CommitMessage func(ctx context.Context) error
+
+func NewBus(consumer consumerInterface, handlers map[string]Handler) *Bus {
 	return &Bus{
-		consumer: consumer,
-		handlers: handlers,
+		consumer:  consumer,
+		handlers:  handlers,
 		semaphore: make(chan struct{}, 10),
 	}
 }
@@ -39,19 +49,19 @@ func (bus *Bus) Listen(ctx context.Context) error {
 	}
 }
 
-func (bus *Bus) processMessage(ctx context.Context, msg app_ports.Message) {
+func (bus *Bus) processMessage(ctx context.Context, msg Message) {
 	handler, ok := bus.handlers[msg.Type]
 
 	if !ok {
 		return
 	}
-	
+
 	bus.wg.Add(1)
 	bus.semaphore <- struct{}{}
 	go func() {
 		defer func() {
 			bus.wg.Done()
-			<- bus.semaphore
+			<-bus.semaphore
 		}()
 
 		if err := handler.Handle(ctx, msg); err != nil {

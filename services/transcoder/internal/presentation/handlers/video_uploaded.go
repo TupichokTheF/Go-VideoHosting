@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	app_ports "transcoder/internal/application/ports"
+	"transcoder/internal/presentation/messaging"
 	pres_ports "transcoder/internal/presentation/ports"
 )
 
@@ -16,6 +16,6 @@ func NewVideoUploadedHandler(service pres_ports.VideoUploadedService) *VideoUplo
 	}
 }
 
-func (handler *VideoUploadedHandler) Handle(ctx context.Context, msg app_ports.Message) error {
+func (handler *VideoUploadedHandler) Handle(ctx context.Context, msg messaging.Message) error {
 	return handler.service.Transcode(ctx)
 }

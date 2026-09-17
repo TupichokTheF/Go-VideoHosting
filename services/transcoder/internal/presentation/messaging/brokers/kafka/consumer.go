@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log/slog"
-	app_ports "transcoder/internal/application/ports"
 	"transcoder/internal/core"
+	"transcoder/internal/presentation/messaging"
 
 	"github.com/segmentio/kafka-go"
 )
@@ -14,7 +14,7 @@ import (
 type Consumer struct {
 	reader *kafka.Reader
 
-	msgChan chan app_ports.Message
+	msgChan chan messaging.Message
 }
 
 func NewConsumer(cfg *core.KafkaConfig) *Consumer {
@@ -26,11 +26,11 @@ func NewConsumer(cfg *core.KafkaConfig) *Consumer {
 
 	return &Consumer{
 		reader:  reader,
-		msgChan: make(chan app_ports.Message, 1),
+		msgChan: make(chan messaging.Message, 1),
 	}
 }
 
-func (consumer *Consumer) FetchMessage() <-chan app_ports.Message {
+func (consumer *Consumer) FetchMessage() <-chan messaging.Message {
 	return consumer.msgChan
 }
 
@@ -48,7 +48,7 @@ func (consumer *Consumer) StartReading(ctx context.Context) error {
 			continue
 		}
 
-		msg := app_ports.Message{
+		msg := messaging.Message{
 			Type:    typeOfMessage(&kafkaMsg),
 			Payload: payload,
 			Callback: func(ctx context.Context) error {

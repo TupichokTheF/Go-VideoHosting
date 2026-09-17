@@ -6,10 +6,10 @@ import (
 	"log/slog"
 	"transcoder/internal/application/services"
 	"transcoder/internal/core"
-	app_kafka "transcoder/internal/infrastructure/brokers/kafka"
-	"transcoder/internal/presentation/messaging"
 	"transcoder/internal/presentation/events"
 	"transcoder/internal/presentation/handlers"
+	"transcoder/internal/presentation/messaging"
+	app_kafka "transcoder/internal/presentation/messaging/brokers/kafka"
 )
 
 func main() {

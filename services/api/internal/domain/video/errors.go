@@ -11,6 +11,7 @@ var (
 	ErrNotFound           = errors.New("Video doesn't exist")
 	ErrVideoNotLoaded     = errors.New("Video doesn't loaded")
 	ErrInvalidTransition  = errors.New("Invalid transition of video")
+	ErrNotAvailable       = errors.New("Video is not available to show")
 )
 
 type ValidationError struct {

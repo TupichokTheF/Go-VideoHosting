@@ -1,8 +1,8 @@
 package events
 
-import app_ports "transcoder/internal/application/ports"
+import "transcoder/internal/presentation/messaging"
 
-func WithVideoUploadedEvent(handler app_ports.Handler) Option {
+func WithVideoUploadedEvent(handler messaging.Handler) Option {
 	return func(manager EventsManager) {
 		manager["video.uploaded"] = handler
 	}

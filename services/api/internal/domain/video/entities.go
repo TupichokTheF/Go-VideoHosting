@@ -3,6 +3,7 @@ package video
 import (
 	"fmt"
 	"project/internal/domain/event"
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -70,19 +71,19 @@ func (video *Video) Size() int64 {
 
 var transitions = map[Status][]Status{
 	Draft:    {Uploaded, Deleted},
-	Uploaded: {Deleted},
+	Uploaded: {Deleted, Ready},
 	Ready:    {Deleted},
 }
 
-func (v *Video) transitionTo(next Status) error {
-	for _, allowed := range transitions[v.status] {
-		if allowed == next {
-			v.status = next
-			return nil
-		}
-	}
+var statusToShow = []Status{Uploaded, Ready}
 
-	return fmt.Errorf("transition %s to %s: %w", v.status, next, ErrInvalidTransition)
+func (v *Video) transitionTo(next Status) error {
+	if !slices.Contains(transitions[v.status], next) {
+		return fmt.Errorf("transition %s to %s: %w", v.status, next, ErrInvalidTransition)
+	}
+	v.status = next
+
+	return nil
 }
 
 func (v *Video) MarkUploaded(size int64) error {
@@ -93,4 +94,15 @@ func (v *Video) MarkUploaded(size int64) error {
 	v.size = size
 
 	return nil
+}
+
+func (v *Video) CanBeShowed() error {
+	switch v.status {
+	case Deleted:
+		return fmt.Errorf("can be showed: %w", ErrNotFound)
+	case Ready, Uploaded:
+		return nil
+	default:
+		return fmt.Errorf("can be showed: %w", ErrNotAvailable)
+	}
 }

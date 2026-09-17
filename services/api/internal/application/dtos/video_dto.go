@@ -14,7 +14,7 @@ type CreateVideo struct {
 }
 
 type GetVideo struct {
-	VideoID string
+	VideoID uuid.UUID
 }
 
 type CompleteVideo struct {

@@ -1,5 +1,7 @@
 package schemas
 
+import "github.com/google/uuid"
+
 type CreateVideo struct {
 	OwnerID     int    `json:"owner_id" example:"1"`
 	Title       string `json:"title" example:"Cool video about cats"`
@@ -7,7 +9,7 @@ type CreateVideo struct {
 }
 
 type GetVideo struct {
-	VideoID string `json:"video_id"`
+	VideoID uuid.UUID `json:"video_id"`
 }
 
 type PresignedURL struct {

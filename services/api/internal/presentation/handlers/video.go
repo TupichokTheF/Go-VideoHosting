@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"project/internal/application/dtos"
 	app_context "project/internal/presentation/context"
@@ -36,13 +35,15 @@ func (handler *VideoHandler) AddVideo(w http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	var request schemas.CreateVideo = schemas.CreateVideo{OwnerID: userID}
+	var request schemas.CreateVideo
 	if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
 		errorResponse := schemas.Error{Error: "Invalid request body"}
 		response.Error(w, http.StatusBadRequest, errorResponse)
 		logger.Error("erorr whiel adding video", "error", err)
 		return
 	}
+
+	request.OwnerID = userID
 
 	result, err := handler.videoService.CreateVideo(req.Context(), mappers.FromCreateVideoSchemaToDTO(&request))
 	if err != nil {
@@ -59,17 +60,16 @@ func (handler *VideoHandler) AddVideo(w http.ResponseWriter, req *http.Request) 
 func (handler *VideoHandler) GetVideo(w http.ResponseWriter, req *http.Request) {
 	logger := app_context.LoggerFromContext(req.Context())
 
-	var request schemas.GetVideo
-	if err := json.NewDecoder(req.Body).Decode(&request); err != nil {
-		errorResponse := schemas.Error{Error: "Invalid request body"}
+	videoID, err := uuid.Parse(chi.URLParam(req, "video_id"))
+	if err != nil {
+		errorResponse := schemas.Error{Error: "Invalid type of video id"}
 		response.Error(w, http.StatusBadRequest, errorResponse)
 		logger.Error("error while getting video", "error", err)
 		return
 	}
 
-	result, err := handler.videoService.GetVideo(req.Context(), mappers.FromGetVideoSchemaToDTO(&request))
+	result, err := handler.videoService.GetVideo(req.Context(), mappers.FromGetVideoSchemaToDTO(&schemas.GetVideo{VideoID: videoID}))
 	if err != nil {
-		fmt.Println(err)
 		status, message := mappers.FromApplicationToApiError(err)
 		errorResponse := schemas.Error{Error: message}
 		response.Error(w, status, errorResponse)

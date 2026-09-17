@@ -52,7 +52,7 @@ func (authService *AuthService) AuthorizeUser(ctx context.Context, authorizeDTO 
 	}
 
 	if ok := u.VerifyPassword(authorizeDTO.Password, authService.hasher); !ok {
-		return nil, fmt.Errorf("user Authorization: %w", user.InvalidPassword)
+		return nil, fmt.Errorf("user Authorization: %w", user.ErrInvalidPassword)
 	}
 
 	accessToken, err := authService.jwtManager.NewAccessToken(u.ID())

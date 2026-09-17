@@ -1,10 +1,10 @@
 package events
 
 import (
-	app_ports "transcoder/internal/application/ports"
+	"transcoder/internal/presentation/messaging"
 )
 
-type EventsManager map[string]app_ports.Handler
+type EventsManager map[string]messaging.Handler
 
 type Option func(EventsManager)
 

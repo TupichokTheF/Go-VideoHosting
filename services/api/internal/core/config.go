@@ -10,7 +10,6 @@ import (
 )
 
 type Config struct {
-	BasePath string `env:"BASE_PATH" env-required:"true"`
 	HTTPConfig
 	DataBaseConfig
 	RedisConfig

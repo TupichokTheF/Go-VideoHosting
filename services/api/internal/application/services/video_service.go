@@ -49,13 +49,22 @@ func (videoService *VideoService) CreateVideo(ctx context.Context, videoData *dt
 }
 
 func (videoService *VideoService) GetVideo(ctx context.Context, videoData *dtos.GetVideo) (*dtos.PresignedURL, error) {
-	url, err := videoService.videoStorage.PresignedURLGet(ctx, videoData.VideoID)
+	video, err := videoService.videoRepo.GetVideoByID(ctx, videoData.VideoID)
+	if err != nil {
+		return nil, fmt.Errorf("get video: %w", err)
+	}
+
+	if err := video.CanBeShowed(); err != nil {
+		return nil, fmt.Errorf("get video: %w", err)
+	}
+
+	url, err := videoService.videoStorage.PresignedURLGet(ctx, videoData.VideoID.String())
 	if err != nil {
 		return nil, fmt.Errorf("get video: %w", err)
 	}
 
 	return &dtos.PresignedURL{
-		VideoID: videoData.VideoID,
+		VideoID: videoData.VideoID.String(),
 		URL:     url,
 	}, nil
 }

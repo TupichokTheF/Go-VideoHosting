@@ -18,11 +18,11 @@ func FromApplicationToApiError(appError error) (int, string) {
 		return http.StatusBadRequest, validationErrorUser.Reason
 	case errors.As(appError, &validationErrorVideo):
 		return http.StatusBadRequest, validationErrorVideo.Reason
-	case errors.Is(appError, user.AlreadyExistError):
+	case errors.Is(appError, user.ErrAlreadyExist):
 		return http.StatusConflict, "User already exists"
-	case errors.Is(appError, user.NotFoundError):
+	case errors.Is(appError, user.ErrNotFound):
 		return http.StatusBadRequest, "User wasn't found"
-	case errors.Is(appError, user.InvalidPassword):
+	case errors.Is(appError, user.ErrInvalidPassword):
 		return http.StatusUnauthorized, "Invalid password"
 	case errors.Is(appError, app_errors.ErrInvalidToken):
 		return http.StatusUnauthorized, "Invalid token"
