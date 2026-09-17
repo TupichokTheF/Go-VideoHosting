@@ -7,7 +7,7 @@ import (
 	"transcoder/internal/application/services"
 	"transcoder/internal/core"
 	app_kafka "transcoder/internal/infrastructure/brokers/kafka"
-	"transcoder/internal/infrastructure/messaging"
+	"transcoder/internal/presentation/messaging"
 	"transcoder/internal/presentation/events"
 	"transcoder/internal/presentation/handlers"
 )

@@ -2,8 +2,8 @@ package messaging
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
+	"sync"
 	app_ports "transcoder/internal/application/ports"
 	"transcoder/internal/presentation/events"
 )
@@ -11,6 +11,8 @@ import (
 type Bus struct {
 	consumer consumerInterface
 	handlers events.EventsManager
+	wg sync.WaitGroup
+	semaphore chan struct{}
 }
 
 type consumerInterface interface {
@@ -21,6 +23,7 @@ func NewBus(consumer consumerInterface, handlers events.EventsManager) *Bus {
 	return &Bus{
 		consumer: consumer,
 		handlers: handlers,
+		semaphore: make(chan struct{}, 10),
 	}
 }
 
@@ -28,7 +31,8 @@ func (bus *Bus) Listen(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("Context was cancelled")
+			bus.wg.Wait()
+			return nil
 		case msg := <-bus.consumer.FetchMessage():
 			bus.processMessage(ctx, msg)
 		}
@@ -41,8 +45,15 @@ func (bus *Bus) processMessage(ctx context.Context, msg app_ports.Message) {
 	if !ok {
 		return
 	}
-
+	
+	bus.wg.Add(1)
+	bus.semaphore <- struct{}{}
 	go func() {
+		defer func() {
+			bus.wg.Done()
+			<- bus.semaphore
+		}()
+
 		if err := handler.Handle(ctx, msg); err != nil {
 			slog.Error("error while handle message", "error", err)
 
