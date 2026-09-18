@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"log/slog"
 	"transcoder/internal/application/services"
 	"transcoder/internal/core"
@@ -10,13 +9,15 @@ import (
 	"transcoder/internal/presentation/handlers"
 	"transcoder/internal/presentation/messaging"
 	app_kafka "transcoder/internal/presentation/messaging/brokers/kafka"
+
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
 	start()
 }
 
-func start() {
+func start() error {
 	cfg := core.LoadConfig()
 
 	kafkaConsumer := app_kafka.NewConsumer(&cfg.KafkaConfig)
@@ -26,15 +27,11 @@ func start() {
 		}
 	}()
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	gErr, ctx := errgroup.WithContext(context.Background())
 
-	go func() {
-		if err := kafkaConsumer.StartReading(ctx); err != nil {
-			slog.Error("error while starting reading messages from kafka", "error", err)
-			cancel()
-		}
-	}()
+	gErr.Go(func() error {
+		return kafkaConsumer.StartReading(ctx)
+	})
 
 	videoUploadedService := services.NewVideoUploadedService()
 
@@ -47,7 +44,9 @@ func start() {
 	eventsManager := events.NewEventsManager(eventsHandlers...)
 
 	bus := messaging.NewBus(kafkaConsumer, eventsManager)
-	if err := bus.Listen(ctx); err != nil {
-		log.Fatal("error while starting listen messages")
-	}
+	gErr.Go(func() error {
+		return bus.Listen(ctx)
+	})
+
+	return gErr.Wait()
 }

@@ -35,10 +35,10 @@ func (consumer *Consumer) FetchMessage() <-chan messaging.Message {
 }
 
 func (consumer *Consumer) StartReading(ctx context.Context) error {
+	defer close(consumer.msgChan)
 	for {
 		kafkaMsg, err := consumer.reader.FetchMessage(ctx)
 		if err != nil {
-			consumer.msgChan = nil
 			return fmt.Errorf("error while reading messages from kafka: %w", err)
 		}
 
@@ -60,7 +60,12 @@ func (consumer *Consumer) StartReading(ctx context.Context) error {
 			},
 		}
 
-		consumer.msgChan <- msg
+		select {
+		case <-ctx.Done():
+			return fmt.Errorf("start reading: %w", ctx.Err())
+		default:
+			consumer.msgChan <- msg
+		}
 	}
 }
 

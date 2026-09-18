@@ -43,7 +43,11 @@ func (bus *Bus) Listen(ctx context.Context) error {
 		case <-ctx.Done():
 			bus.wg.Wait()
 			return nil
-		case msg := <-bus.consumer.FetchMessage():
+		case msg, ok := <-bus.consumer.FetchMessage():
+			if !ok {
+				bus.wg.Wait()
+				return nil
+			}
 			bus.processMessage(ctx, msg)
 		}
 	}
