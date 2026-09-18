@@ -26,10 +26,10 @@ func (repo *VideoRepository) AddVideo(ctx context.Context, video *video.Video) (
 
 	state := video.State()
 	err := repo.pool.QueryRow(ctx,
-		`INSERT INTO videos(owner_id, title, description, status, created_at) 
+		`INSERT INTO videos(video_id, owner_id, title, description, status, created_at) 
 		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING video_id`,
-		state.OwnerID, state.Title, state.Description, state.Status, state.CreatedAt).Scan(&video_id)
+		state.ID, state.OwnerID, state.Title, state.Description, state.Status, state.CreatedAt).Scan(&video_id)
 	if err != nil {
 		return "", fmt.Errorf("error while adding video %v : %w", video_id, err)
 	}
@@ -58,11 +58,11 @@ func (repo *VideoRepository) UpdateVideo(ctx context.Context, v *video.Video) er
 	rows, err := repo.pool.Exec(ctx,
 		`UPDATE videos SET status = $2, size = $3
 		 WHERE video_id = $1`, s.ID, s.Status, s.Size)
-	if rows.RowsAffected() == 0 {
-		return fmt.Errorf("update video %s: %w", s.ID, video.ErrNotFound)
-	}
 	if err != nil {
 		return fmt.Errorf("update video %s: %w", s.ID, err)
+	}
+	if rows.RowsAffected() == 0 {
+		return fmt.Errorf("update video %s: %w", s.ID, video.ErrNotFound)
 	}
 
 	return nil

@@ -75,8 +75,6 @@ var transitions = map[Status][]Status{
 	Ready:    {Deleted},
 }
 
-var statusToShow = []Status{Uploaded, Ready}
-
 func (v *Video) transitionTo(next Status) error {
 	if !slices.Contains(transitions[v.status], next) {
 		return fmt.Errorf("transition %s to %s: %w", v.status, next, ErrInvalidTransition)
