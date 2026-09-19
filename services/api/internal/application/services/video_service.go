@@ -37,7 +37,9 @@ func (videoService *VideoService) CreateVideo(ctx context.Context, videoData *dt
 		return nil, fmt.Errorf("create video: %w", err)
 	}
 
-	url, err := videoService.videoStorage.PresignedURLCreate(ctx, newVideo.ID().String())
+	storageKey := fmt.Sprintf("videos/%s/source", newVideo.ID().String())
+
+	url, err := videoService.videoStorage.PresignedURLCreate(ctx, storageKey)
 	if err != nil {
 		return nil, fmt.Errorf("create video: %w", err)
 	}

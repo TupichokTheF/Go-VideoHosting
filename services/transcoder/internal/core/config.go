@@ -10,6 +10,7 @@ import (
 
 type Config struct {
 	KafkaConfig
+	TranscoderConfig
 }
 
 type KafkaConfig struct {
@@ -21,6 +22,10 @@ type KafkaConfig struct {
 
 func (cfg *KafkaConfig) Address() string {
 	return fmt.Sprintf("%s:%v", cfg.Host, cfg.Port)
+}
+
+type TranscoderConfig struct {
+	Bin string `env:"TRANSCODER_BIN" env-default:"/usr/bin/ffmpeg"`
 }
 
 func LoadConfig() *Config {

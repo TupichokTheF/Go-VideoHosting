@@ -40,6 +40,6 @@ const (
 	Uploaded   Status = "uploaded"
 	Ready      Status = "ready"
 	Deleted    Status = "deleted"
-	Procession Status = "processing"
+	Processing Status = "processing"
 	Failed     Status = "failed"
 )

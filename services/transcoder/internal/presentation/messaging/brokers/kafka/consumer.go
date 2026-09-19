@@ -63,8 +63,7 @@ func (consumer *Consumer) StartReading(ctx context.Context) error {
 		select {
 		case <-ctx.Done():
 			return fmt.Errorf("start reading: %w", ctx.Err())
-		default:
-			consumer.msgChan <- msg
+		case consumer.msgChan <- msg:
 		}
 	}
 }

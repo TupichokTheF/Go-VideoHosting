@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"transcoder/internal/application/services"
 	"transcoder/internal/core"
+	"transcoder/internal/infrastructure/transcoder"
 	"transcoder/internal/presentation/events"
 	"transcoder/internal/presentation/handlers"
 	"transcoder/internal/presentation/messaging"
@@ -14,11 +15,22 @@ import (
 )
 
 func main() {
-	start()
+	if err := start(); err != nil {
+		slog.Error("error in main", "error", err)
+	}
 }
 
 func start() error {
 	cfg := core.LoadConfig()
+
+	logger := core.SetupLogger()
+	slog.SetDefault(logger)
+
+	transcoder := transcoder.NewTranscoderCmd(cfg.TranscoderConfig.Bin)
+
+	videoUploadedService := services.NewVideoUploadedService(transcoder)
+
+	videoUploadedHandler := handlers.NewVideoUploadedHandler(videoUploadedService)
 
 	kafkaConsumer := app_kafka.NewConsumer(&cfg.KafkaConfig)
 	defer func() {
@@ -32,10 +44,6 @@ func start() error {
 	gErr.Go(func() error {
 		return kafkaConsumer.StartReading(ctx)
 	})
-
-	videoUploadedService := services.NewVideoUploadedService()
-
-	videoUploadedHandler := handlers.NewVideoUploadedHandler(videoUploadedService)
 
 	eventsHandlers := []events.Option{
 		events.WithVideoUploadedEvent(videoUploadedHandler),
