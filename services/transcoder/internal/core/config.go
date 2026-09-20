@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
@@ -11,6 +12,7 @@ import (
 type Config struct {
 	KafkaConfig
 	TranscoderConfig
+	MinioConfig
 }
 
 type KafkaConfig struct {
@@ -26,6 +28,20 @@ func (cfg *KafkaConfig) Address() string {
 
 type TranscoderConfig struct {
 	Bin string `env:"TRANSCODER_BIN" env-default:"/usr/bin/ffmpeg"`
+}
+
+type MinioConfig struct {
+	Host     string        `env:"MINIO_HOST" env-default:"localhost"`
+	Port     int           `env:"MINIO_PORT" env-default:"9000"`
+	Bucket   string        `env:"MINIO_BUCKET" env-default:"videos"`
+	User     string        `env:"MINIO_USER" env-required:"true"`
+	Password string        `env:"MINIO_PASSWORD" env-required:"true"`
+	TTL      time.Duration `env:"MINIO_TTL" env-default:"30m"`
+	UseSSL   bool          `env:"MINIO_SSL" env-default:"false"`
+}
+
+func (cfg *MinioConfig) Endpoint() string {
+	return fmt.Sprintf("%s:%v", cfg.Host, cfg.Port)
 }
 
 func LoadConfig() *Config {

@@ -2,14 +2,16 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"transcoder/internal/application/services"
 	"transcoder/internal/core"
+	app_kafka "transcoder/internal/infrastructure/brokers/kafka"
+	"transcoder/internal/infrastructure/storage"
 	"transcoder/internal/infrastructure/transcoder"
 	"transcoder/internal/presentation/events"
 	"transcoder/internal/presentation/handlers"
 	"transcoder/internal/presentation/messaging"
-	app_kafka "transcoder/internal/presentation/messaging/brokers/kafka"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -26,9 +28,15 @@ func start() error {
 	logger := core.SetupLogger()
 	slog.SetDefault(logger)
 
-	transcoder := transcoder.NewTranscoderCmd(cfg.TranscoderConfig.Bin)
+	minioClient, err := storage.NewMinioClient(&cfg.MinioConfig)
+	if err != nil {
+		return fmt.Errorf("starting server: %w", err)
+	}
 
-	videoUploadedService := services.NewVideoUploadedService(transcoder)
+	transcoder := transcoder.NewTranscoderCmd(cfg.TranscoderConfig.Bin)
+	storage := storage.NewMinioService(minioClient, cfg.MinioConfig.Bucket)
+
+	videoUploadedService := services.NewVideoUploadedService(transcoder, storage)
 
 	videoUploadedHandler := handlers.NewVideoUploadedHandler(videoUploadedService)
 

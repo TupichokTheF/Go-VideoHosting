@@ -1,8 +1,6 @@
 package events
 
-import (
-	"transcoder/internal/presentation/messaging"
-)
+import "transcoder/internal/presentation/messaging"
 
 type EventsManager map[string]messaging.Handler
 

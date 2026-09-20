@@ -1,7 +1,10 @@
 package pres_ports
 
-import "context"
+import (
+	"context"
+	"transcoder/internal/application/dtos"
+)
 
 type VideoUploadedService interface {
-	Transcode(ctx context.Context) error
+	Transcode(ctx context.Context, videoData dtos.TranscodeVideo) error
 }
