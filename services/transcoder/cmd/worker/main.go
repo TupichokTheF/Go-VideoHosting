@@ -35,10 +35,13 @@ func start() error {
 
 	transcoder := transcoder.NewTranscoderCmd(cfg.TranscoderConfig.Bin)
 	storage := storage.NewMinioService(minioClient, cfg.MinioConfig.Bucket)
+	kafkaProducer := app_kafka.NewProducer(&cfg.KafkaConfig)
 
 	videoUploadedService := services.NewVideoUploadedService(transcoder, storage)
 
-	videoUploadedHandler := handlers.NewVideoUploadedHandler(videoUploadedService)
+	publisher := messaging.NewPublisher(kafkaProducer)
+
+	videoUploadedHandler := handlers.NewVideoUploadedHandler(videoUploadedService, publisher)
 
 	kafkaConsumer := app_kafka.NewConsumer(&cfg.KafkaConfig)
 	defer func() {

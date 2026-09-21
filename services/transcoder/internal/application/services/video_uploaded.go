@@ -23,11 +23,11 @@ func NewVideoUploadedService(transcoder app_ports.Transcoder, storage app_ports.
 }
 
 func (service *VideoUploadedService) Transcode(ctx context.Context, videoData dtos.TranscodeVideo) error {
-	outputKey := fmt.Sprintf("/vide/%s/720p.mp4", videoData.VideoID)
+	outputKey := fmt.Sprintf("/video/%s/720p.mp4", videoData.VideoID)
 	sourceKey := fmt.Sprintf("/video/%s/source", videoData.VideoID)
 
 	ok, err := service.storage.IsExist(ctx, outputKey)
-	if ok == false {
+	if ok == true {
 		if err != nil {
 			return fmt.Errorf("transcode video service: %w", err)
 		}
