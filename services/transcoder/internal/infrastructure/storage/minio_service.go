@@ -34,10 +34,10 @@ func (service *MinioService) Download(ctx context.Context, key string, dstDir st
 }
 
 func (service *MinioService) IsExist(ctx context.Context, key string) (bool, error) {
-	_, err := service.client.StatObject(ctx, service.bucket, key, minio.GetObjectOptions{})
+	_, err := service.client.StatObject(ctx, service.bucket, key, minio.StatObjectOptions{})
 	if err != nil {
 		if minio.ToErrorResponse(err).Code == "NoSuchKey" {
-			return false, fmt.Errorf("is exist: %w", app_ports.ErrObjectNotFound)
+			return false, nil
 		}
 
 		return false, fmt.Errorf("is exist: %w", err)

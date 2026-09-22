@@ -17,5 +17,5 @@ type Storage interface {
 
 var (
 	ErrObjectNotFound = errors.New("Object was not found")
-	ErrUnprocessiable = errors.New("Unprocessable error")
+	ErrUnprocessable  = errors.New("Unprocessable error")
 )

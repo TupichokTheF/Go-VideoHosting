@@ -36,7 +36,7 @@ func (handler *VideoUploadedHandler) Handle(ctx context.Context, msg messaging.M
 	case err == nil:
 		return nil
 
-	case errors.Is(err, app_ports.ErrUnprocessiable):
+	case errors.Is(err, app_ports.ErrUnprocessable):
 		errorEvent := video.UploadedFailedEvent{
 			Base:    domain_event.Base{CreatedAt: time.Now()},
 			VideoID: dto.VideoID,

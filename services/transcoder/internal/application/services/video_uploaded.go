@@ -23,12 +23,12 @@ func NewVideoUploadedService(transcoder app_ports.Transcoder, storage app_ports.
 }
 
 func (service *VideoUploadedService) Transcode(ctx context.Context, videoData dtos.TranscodeVideo) (err error) {
-	defer func() error {
-		return service.isUnprocessable(err)
+	defer func() {
+		err = isUnprocessable(err)
 	}()
 
-	outputKey := fmt.Sprintf("/videos/%s/720p.mp4", videoData.VideoID)
-	sourceKey := fmt.Sprintf("/videos/%s/source", videoData.VideoID)
+	outputKey := fmt.Sprintf("videos/%s/720p.mp4", videoData.VideoID)
+	sourceKey := fmt.Sprintf("videos/%s/source", videoData.VideoID)
 
 	ok, err := service.storage.IsExist(ctx, outputKey)
 	if err != nil {
@@ -60,10 +60,10 @@ func (service *VideoUploadedService) Transcode(ctx context.Context, videoData dt
 	return nil
 }
 
-func (service *VideoUploadedService) isUnprocessable(err error) error {
+func isUnprocessable(err error) error {
 	switch {
 	case errors.Is(err, app_ports.ErrObjectNotFound):
-		return fmt.Errorf("transcode video service: %w", err)
+		return fmt.Errorf("transcode video service: %w", app_ports.ErrUnprocessable)
 	default:
 		return err
 	}
