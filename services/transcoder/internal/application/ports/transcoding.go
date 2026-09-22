@@ -1,6 +1,9 @@
 package app_ports
 
-import "context"
+import (
+	"context"
+	"errors"
+)
 
 type Transcoder interface {
 	Transcode(ctx context.Context, inputFilePath, outputFilePath string) error
@@ -11,3 +14,8 @@ type Storage interface {
 	IsExist(ctx context.Context, key string) (bool, error)
 	Upload(ctx context.Context, key string, srcDir string) error
 }
+
+var (
+	ErrObjectNotFound = errors.New("Object was not found")
+	ErrUnprocessiable = errors.New("Unprocessable error")
+)

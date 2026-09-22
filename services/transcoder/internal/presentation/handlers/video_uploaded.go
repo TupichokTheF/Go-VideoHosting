@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
+	app_ports "transcoder/internal/application/ports"
 	domain_event "transcoder/internal/domain/event"
 	"transcoder/internal/domain/video"
 	"transcoder/internal/presentation/mappers"
@@ -18,7 +20,7 @@ type VideoUploadedHandler struct {
 
 func NewVideoUploadedHandler(service pres_ports.VideoUploadedService, publisher pres_ports.Publisher) *VideoUploadedHandler {
 	return &VideoUploadedHandler{
-		service: service,
+		service:   service,
 		publisher: publisher,
 	}
 }
@@ -30,14 +32,21 @@ func (handler *VideoUploadedHandler) Handle(ctx context.Context, msg messaging.M
 	}
 
 	err = handler.service.Transcode(ctx, dto)
-	if err != nil {
+	switch {
+	case err == nil:
+		return nil
+
+	case errors.Is(err, app_ports.ErrUnprocessiable):
 		errorEvent := video.UploadedFailedEvent{
 			Base:    domain_event.Base{CreatedAt: time.Now()},
 			VideoID: dto.VideoID,
 		}
-		handler.publisher.PublishEvents(ctx, []domain_event.Interface{&errorEvent})
-		return fmt.Errorf("error while video transcoding: %w", err)
-	}
+		if err := handler.publisher.PublishEvents(ctx, []domain_event.Interface{&errorEvent}); err != nil {
+			return fmt.Errorf("video transcoding handler: %w", err)
+		}
 
-	return nil
+		return nil
+	default:
+		return fmt.Errorf("video transcoding handler: %w", err)
+	}
 }

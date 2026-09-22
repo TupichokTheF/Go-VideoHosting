@@ -2,9 +2,7 @@ package app_kafka
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"log/slog"
 	"transcoder/internal/core"
 	"transcoder/internal/presentation/messaging"
 
@@ -42,15 +40,9 @@ func (consumer *Consumer) StartReading(ctx context.Context) error {
 			return fmt.Errorf("error while reading messages from kafka: %w", err)
 		}
 
-		var payload = make(map[string]any)
-		if err := json.Unmarshal(kafkaMsg.Value, &payload); err != nil {
-			slog.Warn("invalid data of message")
-			continue
-		}
-
 		msg := messaging.Message{
 			Type:    typeOfMessage(&kafkaMsg),
-			Payload: payload,
+			Payload: kafkaMsg.Value,
 			Callback: func(ctx context.Context) error {
 				if err := consumer.reader.CommitMessages(ctx, kafkaMsg); err != nil {
 					return fmt.Errorf("error while commiting message: %w", err)

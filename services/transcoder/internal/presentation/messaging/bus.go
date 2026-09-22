@@ -23,7 +23,7 @@ type Handler interface {
 
 type Message struct {
 	Type     string
-	Payload  map[string]any
+	Payload  []byte
 	Callback CommitMessage
 }
 

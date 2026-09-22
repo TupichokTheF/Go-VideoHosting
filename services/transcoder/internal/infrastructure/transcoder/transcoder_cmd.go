@@ -34,5 +34,6 @@ func (transcoder *TranscoderCmd) Transcode(ctx context.Context, inputFilePath, o
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("ffmpeg: %w: %s", err, stderr.String())
 	}
+
 	return nil
 }

@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
-	"transcoder/internal/domain/video"
+	app_ports "transcoder/internal/application/ports"
 
 	"github.com/minio/minio-go/v7"
 )
@@ -24,7 +24,7 @@ func (service *MinioService) Download(ctx context.Context, key string, dstDir st
 	err := service.client.FGetObject(ctx, service.bucket, key, dstDir, minio.GetObjectOptions{})
 	if err != nil {
 		if minio.ToErrorResponse(err).Code == "NoSuchKey" {
-			return fmt.Errorf("download video: %w", video.ErrNotFound)
+			return fmt.Errorf("download video: %w", app_ports.ErrObjectNotFound)
 		}
 
 		return fmt.Errorf("download video: %w", err)
@@ -37,7 +37,7 @@ func (service *MinioService) IsExist(ctx context.Context, key string) (bool, err
 	_, err := service.client.StatObject(ctx, service.bucket, key, minio.GetObjectOptions{})
 	if err != nil {
 		if minio.ToErrorResponse(err).Code == "NoSuchKey" {
-			return false, nil
+			return false, fmt.Errorf("is exist: %w", app_ports.ErrObjectNotFound)
 		}
 
 		return false, fmt.Errorf("is exist: %w", err)

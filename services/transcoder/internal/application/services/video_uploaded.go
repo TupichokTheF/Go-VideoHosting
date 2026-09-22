@@ -2,12 +2,12 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"transcoder/internal/application/dtos"
 	app_ports "transcoder/internal/application/ports"
-	"transcoder/internal/domain/video"
 )
 
 type VideoUploadedService struct {
@@ -22,29 +22,33 @@ func NewVideoUploadedService(transcoder app_ports.Transcoder, storage app_ports.
 	}
 }
 
-func (service *VideoUploadedService) Transcode(ctx context.Context, videoData dtos.TranscodeVideo) error {
-	outputKey := fmt.Sprintf("/video/%s/720p.mp4", videoData.VideoID)
-	sourceKey := fmt.Sprintf("/video/%s/source", videoData.VideoID)
+func (service *VideoUploadedService) Transcode(ctx context.Context, videoData dtos.TranscodeVideo) (err error) {
+	defer func() error {
+		return service.isUnprocessable(err)
+	}()
+
+	outputKey := fmt.Sprintf("/videos/%s/720p.mp4", videoData.VideoID)
+	sourceKey := fmt.Sprintf("/videos/%s/source", videoData.VideoID)
 
 	ok, err := service.storage.IsExist(ctx, outputKey)
-	if ok == true {
-		if err != nil {
-			return fmt.Errorf("transcode video service: %w", err)
-		}
-
-		return fmt.Errorf("transcode video service: %w", video.ErrNotFound)
+	if err != nil {
+		return fmt.Errorf("transcode video service: %w", err)
+	}
+	if ok {
+		return nil
 	}
 
 	dir, err := os.MkdirTemp("", "transcode")
 	if err != nil {
 		return fmt.Errorf("transcode video service: %w", err)
 	}
+	defer os.RemoveAll(dir)
 
 	srcDir := filepath.Join(dir, "source")
-	dstDir := filepath.Join(dir, "720p")
+	dstDir := filepath.Join(dir, "720p.mp4")
 
 	if err := service.storage.Download(ctx, sourceKey, srcDir); err != nil {
-		return fmt.Errorf("trnascode video service: %w", err)
+		return fmt.Errorf("transcode video service: %w", err)
 	}
 	if err := service.transcoder.Transcode(ctx, srcDir, dstDir); err != nil {
 		return fmt.Errorf("transcode video service: %w", err)
@@ -54,4 +58,13 @@ func (service *VideoUploadedService) Transcode(ctx context.Context, videoData dt
 	}
 
 	return nil
+}
+
+func (service *VideoUploadedService) isUnprocessable(err error) error {
+	switch {
+	case errors.Is(err, app_ports.ErrObjectNotFound):
+		return fmt.Errorf("transcode video service: %w", err)
+	default:
+		return err
+	}
 }

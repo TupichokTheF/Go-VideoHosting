@@ -1,24 +1,29 @@
 package mappers
 
 import (
-	"errors"
+	"encoding/json"
 	"fmt"
+	"time"
 	"transcoder/internal/application/dtos"
 
 	"github.com/google/uuid"
 )
 
-func FromUploadedEventToDTO(payload map[string]any) (dtos.TranscodeVideo, error) {
-	rawID, _ := payload["video_id"].(string)
-    id, err := uuid.Parse(rawID)
-    if err != nil {
-        return dtos.TranscodeVideo{}, fmt.Errorf("video_id: %w", err)
-    }
+type videoUploadedPayload struct {
+	VideoID   uuid.UUID `json:"video_id"`
+	OwnerID   int       `json:"owner_id"`
+	CreatedAt time.Time `json:"created_at"`
+}
 
-    ownerID, ok := payload["owner_id"].(float64)
-    if !ok {
-        return dtos.TranscodeVideo{}, errors.New("owner_id: not a number")
-    }
+func FromUploadedEventToDTO(payload []byte) (dtos.TranscodeVideo, error) {
+	var uploadedPayload videoUploadedPayload
+	if err := json.Unmarshal(payload, &uploadedPayload); err != nil {
+		return dtos.TranscodeVideo{}, fmt.Errorf("transform from uploaded video payload to dto: %w", err)
+	}
 
-    return dtos.TranscodeVideo{VideoID: id, OwnerID: int(ownerID)}, nil
+	return dtos.TranscodeVideo{
+		VideoID:   uploadedPayload.VideoID,
+		OwnerID:   uploadedPayload.OwnerID,
+		CreatedAt: uploadedPayload.CreatedAt,
+	}, nil
 }
