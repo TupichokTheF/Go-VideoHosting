@@ -4,9 +4,9 @@ import (
 	"errors"
 	"net/http"
 	app_errors "project/internal/application/errors"
+	app_ports "project/internal/application/ports"
 	"project/internal/domain/user"
 	"project/internal/domain/video"
-	"project/internal/infrastructure/storage"
 )
 
 func FromApplicationToApiError(appError error) (int, string) {
@@ -30,10 +30,16 @@ func FromApplicationToApiError(appError error) (int, string) {
 		return http.StatusForbidden, "Forbidden"
 	case errors.Is(appError, video.ErrVideoNotLoaded):
 		return http.StatusBadRequest, "Video not loaded"
-	case errors.Is(appError, storage.ErrObjectNotFound):
+	case errors.Is(appError, app_ports.ErrObjectNotFound):
 		return http.StatusNotFound, "Object not found"
 	case errors.Is(appError, app_errors.ErrTokenRevoked):
 		return http.StatusUnauthorized, "Refresh token was revoked"
+	case errors.Is(appError, video.ErrNotFound):
+		return http.StatusNotFound, "Video was not found"
+	case errors.Is(appError, video.ErrNotAvailable):
+		return http.StatusForbidden, "Video not available"
+	case errors.Is(appError, video.ErrInvalidTransition):
+		return http.StatusBadRequest, "Invalid transition"
 	default:
 		return http.StatusInternalServerError, "Internal server error"
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	app_ports "project/internal/application/ports"
 	"time"
 
 	"github.com/minio/minio-go/v7"
@@ -45,7 +46,7 @@ func (service *MinioService) Stat(ctx context.Context, key string) (int64, error
 	info, err := service.client.StatObject(ctx, service.bucket, key, minio.StatObjectOptions{})
 	if err != nil {
 		if minio.ToErrorResponse(err).Code == "NoSuchKey" {
-			return 0, fmt.Errorf("stat %q: %w", key, ErrObjectNotFound)
+			return 0, fmt.Errorf("stat %q: %w", key, app_ports.ErrObjectNotFound)
 		}
 
 		return 0, fmt.Errorf("stat %q: %w", key, err)

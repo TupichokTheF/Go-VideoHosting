@@ -60,7 +60,8 @@ func (videoService *VideoService) GetVideo(ctx context.Context, videoData *dtos.
 		return nil, fmt.Errorf("get video: %w", err)
 	}
 
-	url, err := videoService.videoStorage.PresignedURLGet(ctx, videoData.VideoID.String())
+	key := fmt.Sprintf("videos/%s/source", videoData.VideoID.String())
+	url, err := videoService.videoStorage.PresignedURLGet(ctx, key)
 	if err != nil {
 		return nil, fmt.Errorf("get video: %w", err)
 	}
@@ -80,8 +81,9 @@ func (videoService *VideoService) CompleteVideo(ctx context.Context, completeVid
 	if completeVideoData.UserID != v.OwnerID() {
 		return fmt.Errorf("complete video: %w", app_errors.ErrForbidden)
 	}
-
-	size, err := videoService.videoStorage.Stat(ctx, v.ID().String())
+	
+	key := fmt.Sprintf("videos/%s/source", v.ID().String())
+	size, err := videoService.videoStorage.Stat(ctx, key)
 	if err != nil {
 		return fmt.Errorf("complete video: %w", err)
 	}
