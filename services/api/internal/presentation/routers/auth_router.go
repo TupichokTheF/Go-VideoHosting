@@ -1,12 +1,12 @@
 package routers
 
 import (
-	"project/internal/presentation/handlers"
+	http_handlers "project/internal/presentation/handlers/http"
 
 	"github.com/go-chi/chi/v5"
 )
 
-func WithAuthRouter(handler *handlers.AuthHandler) Option {
+func WithAuthRouter(handler *http_handlers.AuthHandler) Option {
 	return func(router chi.Router) {
 		router.Route(prefix+"/auth", func(r chi.Router) {
 			r.Post("/register", handler.CreateUser)

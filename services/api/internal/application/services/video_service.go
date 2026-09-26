@@ -81,7 +81,7 @@ func (videoService *VideoService) CompleteVideo(ctx context.Context, completeVid
 	if completeVideoData.UserID != v.OwnerID() {
 		return fmt.Errorf("complete video: %w", app_errors.ErrForbidden)
 	}
-	
+
 	key := fmt.Sprintf("videos/%s/source", v.ID().String())
 	size, err := videoService.videoStorage.Stat(ctx, key)
 	if err != nil {

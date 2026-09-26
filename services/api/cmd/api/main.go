@@ -14,7 +14,7 @@ import (
 	"project/internal/infrastructure/repositories"
 	"project/internal/infrastructure/security"
 	"project/internal/infrastructure/storage"
-	"project/internal/presentation/handlers"
+	http_handlers "project/internal/presentation/handlers/http"
 	"project/internal/presentation/routers"
 )
 
@@ -68,9 +68,9 @@ func start() {
 	authService := services.NewAuthService(userRepo, jwtManager, hasher, tokenCache)
 	videoService := services.NewVideoService(videoRepo, videoStorage, kafkaPublisher)
 
-	authHandler := handlers.NewAuthHandler(authService)
-	userHandler := handlers.NewUserHandler(userService)
-	videoHandler := handlers.NewVideoHandler(videoService)
+	authHandler := http_handlers.NewAuthHandler(authService)
+	userHandler := http_handlers.NewUserHandler(userService)
+	videoHandler := http_handlers.NewVideoHandler(videoService)
 
 	routersOptions := []routers.Option{
 		routers.WithAuthRouter(authHandler),
