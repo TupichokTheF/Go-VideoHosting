@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 	app_errors "project/internal/application/errors"
-	app_context "project/internal/presentation/context"
-	"project/internal/presentation/mappers"
-	pres_ports "project/internal/presentation/ports"
-	"project/internal/presentation/response"
-	"project/internal/presentation/schemas"
+	app_context "project/internal/presentation/http/context"
+	"project/internal/presentation/http/mappers"
+	pres_ports "project/internal/presentation/http/ports"
+	"project/internal/presentation/http/response"
+	"project/internal/presentation/http/schemas"
 )
 
 type AuthHandler struct {

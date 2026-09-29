@@ -2,11 +2,11 @@ package http_handlers
 
 import (
 	"net/http"
-	"project/internal/presentation/context"
-	"project/internal/presentation/mappers"
-	pres_ports "project/internal/presentation/ports"
-	"project/internal/presentation/response"
-	"project/internal/presentation/schemas"
+	"project/internal/presentation/http/context"
+	"project/internal/presentation/http/mappers"
+	pres_ports "project/internal/presentation/http/ports"
+	"project/internal/presentation/http/response"
+	"project/internal/presentation/http/schemas"
 )
 
 type UserHandler struct {

@@ -3,7 +3,7 @@ package response
 import (
 	"encoding/json"
 	"net/http"
-	"project/internal/presentation/schemas"
+	"project/internal/presentation/http/schemas"
 )
 
 // JSON - функция, необходимая для формирования HTTP ответа в формате JSON.

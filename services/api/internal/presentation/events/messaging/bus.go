@@ -1,4 +1,4 @@
-package messaging
+package pres_messaging
 
 import (
 	"context"

@@ -1,8 +1,8 @@
 package routers
 
 import (
-	http_handlers "project/internal/presentation/handlers/http"
-	app_middleware "project/internal/presentation/middleware"
+	http_handlers "project/internal/presentation/http/handlers"
+	app_middleware "project/internal/presentation/http/middleware"
 
 	"github.com/go-chi/chi/v5"
 )

@@ -10,12 +10,12 @@ import (
 	"project/internal/infrastructure/cache"
 	"project/internal/infrastructure/database/postgres"
 	app_redis "project/internal/infrastructure/database/redis"
-	"project/internal/infrastructure/messaging"
+	infra_messaging "project/internal/infrastructure/messaging"
 	"project/internal/infrastructure/repositories"
 	"project/internal/infrastructure/security"
 	"project/internal/infrastructure/storage"
-	http_handlers "project/internal/presentation/handlers/http"
-	"project/internal/presentation/routers"
+	http_handlers "project/internal/presentation/http/handlers"
+	"project/internal/presentation/http/routers"
 )
 
 // @title    Go Video Hosting API
@@ -62,7 +62,7 @@ func start() {
 		err := app_kafka.CloseProducer(kafkaProducer)
 		logger.Error("closing of kafka producer completed with error", "error", err)
 	}()
-	kafkaPublisher := messaging.NewPublisher(kafkaProducer)
+	kafkaPublisher := infra_messaging.NewPublisher(kafkaProducer)
 
 	userService := services.NewUserService(userRepo)
 	authService := services.NewAuthService(userRepo, jwtManager, hasher, tokenCache)

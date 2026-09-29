@@ -3,9 +3,9 @@ package app_middleware
 import (
 	"context"
 	"net/http"
-	"project/internal/presentation/context"
-	"project/internal/presentation/response"
-	"project/internal/presentation/schemas"
+	"project/internal/presentation/http/context"
+	"project/internal/presentation/http/response"
+	"project/internal/presentation/http/schemas"
 	"strings"
 )
 

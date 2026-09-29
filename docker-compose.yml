@@ -28,6 +28,18 @@ services:
       postgres: { condition: service_healthy }
     restart: "no"
 
+  transcoder:
+    build: ./services/transcoder
+    container_name: videohosting-transcoder
+    environment:
+      MINIO_HOST: minio
+      KAFKA_HOST: kafka
+    env_file: .env
+    depends_on:
+      minio: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    
+
   postgres:
     image: postgres:17-alpine
     container_name: videohosting-postgres

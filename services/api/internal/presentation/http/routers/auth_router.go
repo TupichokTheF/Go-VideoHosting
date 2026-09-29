@@ -1,7 +1,7 @@
 package routers
 
 import (
-	http_handlers "project/internal/presentation/handlers/http"
+	http_handlers "project/internal/presentation/http/handlers"
 
 	"github.com/go-chi/chi/v5"
 )

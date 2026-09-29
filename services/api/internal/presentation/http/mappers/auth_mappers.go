@@ -2,7 +2,7 @@ package mappers
 
 import (
 	"project/internal/application/dtos"
-	"project/internal/presentation/schemas"
+	"project/internal/presentation/http/schemas"
 )
 
 func FromCreatedSchemaToDTO(schema *schemas.CreateUser) *dtos.UserCreate {

@@ -3,7 +3,7 @@ package app_middleware
 import (
 	"log/slog"
 	"net/http"
-	app_context "project/internal/presentation/context"
+	app_context "project/internal/presentation/http/context"
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
