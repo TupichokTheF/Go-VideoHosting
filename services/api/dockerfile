@@ -1,6 +1,6 @@
 FROM golang:1.26-alpine AS builder
 
-ENV CGO_ENABLED 0
+ENV CGO_ENABLED=0
 
 WORKDIR /build
 
@@ -22,4 +22,4 @@ WORKDIR /app
 COPY --from=builder /out/api /app/api
 COPY --from=builder /out/migrate /app/migrate
 
-ENTRYPOINT ["/app/services/api"]
+ENTRYPOINT ["/app/api"]
