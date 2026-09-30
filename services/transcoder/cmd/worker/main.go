@@ -9,7 +9,6 @@ import (
 	app_kafka "transcoder/internal/infrastructure/brokers/kafka"
 	"transcoder/internal/infrastructure/storage"
 	"transcoder/internal/infrastructure/transcoder"
-	"transcoder/internal/presentation/events"
 	"transcoder/internal/presentation/handlers"
 	"transcoder/internal/presentation/messaging"
 
@@ -56,11 +55,11 @@ func start() error {
 		return kafkaConsumer.StartReading(ctx)
 	})
 
-	eventsHandlers := []events.Option{
-		events.WithVideoUploadedEvent(videoUploadedHandler),
+	eventsHandlers := []messaging.Option{
+		messaging.WithVideoUploadedEvent(videoUploadedHandler),
 	}
 
-	eventsManager := events.NewEventsManager(eventsHandlers...)
+	eventsManager := messaging.NewEventsManager(eventsHandlers...)
 
 	bus := messaging.NewBus(kafkaConsumer, eventsManager)
 	gErr.Go(func() error {

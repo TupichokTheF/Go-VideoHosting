@@ -38,14 +38,13 @@ func NewBus(consumer consumerInterface, handlers map[string]Handler) *Bus {
 }
 
 func (bus *Bus) Listen(ctx context.Context) error {
+	defer bus.wg.Wait()
 	for {
 		select {
 		case <-ctx.Done():
-			bus.wg.Wait()
 			return nil
 		case msg, ok := <-bus.consumer.FetchMessage():
 			if !ok {
-				bus.wg.Wait()
 				return nil
 			}
 			bus.processMessage(ctx, msg)
