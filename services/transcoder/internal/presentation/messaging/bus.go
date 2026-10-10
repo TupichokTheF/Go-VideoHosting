@@ -21,6 +21,14 @@ type Handler interface {
 	Handle(ctx context.Context, msg Message) error
 }
 
+type HandlerFunc func(ctx context.Context, msg Message) error
+
+func (fn HandlerFunc) Handle(ctx context.Context, msg Message) error {
+	return fn(ctx, msg)
+}
+
+type Middleware func(next Handler) Handler
+
 type Message struct {
 	Type     string
 	Payload  []byte
