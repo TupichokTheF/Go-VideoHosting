@@ -3,6 +3,7 @@ package pres_events
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 	domain_event "transcoder/internal/domain/event"
 	"transcoder/internal/domain/video"
@@ -17,33 +18,36 @@ type publisherInterface interface {
 }
 
 func WithVideoUploadedEvent(handler messaging.Handler, publisher publisherInterface) Option {
+	wrappedHandler := middleware.OnFailure(publishFallback(publisher))(middleware.Retry(5, 1*time.Second)(handler))
+
 	return func(manager EventsManager) {
-		handlerWithRetry := func(ctx context.Context, msg messaging.Message) error {
-			wrappedHandler := middleware.Retry(5, 50*time.Millisecond)(handler)
+		manager["video.uploaded"] = wrappedHandler
+	}
+}
 
-			if err := wrappedHandler.Handle(ctx, msg); err != nil {
-				videoID := videoIDFromPayload(msg.Payload)
-				eventToPublish := video.UploadedFailedEvent{
-					Base: domain_event.Base{
-						CreatedAt: time.Now(),
-					},
-					VideoID: videoID,
-				}
+func publishFallback(publisher publisherInterface) func(ctx context.Context, msg messaging.Message) error {
+	return func(ctx context.Context, msg messaging.Message) error {
+		videoID := videoIDFromPayload(msg.Payload)
 
-				publisher.PublishEvents(ctx, []domain_event.Interface{&eventToPublish})
-			}
-
-			return nil
+		event := video.UploadedFailedEvent{
+			Base: domain_event.Base{
+				CreatedAt: time.Now().UTC(),
+			},
+			VideoID: videoID,
 		}
 
-		manager["video.uploaded"] = messaging.HandlerFunc(handlerWithRetry)
+		if err := publisher.PublishEvents(ctx, []domain_event.Interface{&event}); err != nil {
+			return fmt.Errorf("publish failed event: %w", err)
+		}
+
+		return nil
 	}
 }
 
 func videoIDFromPayload(payload []byte) uuid.UUID {
 	var videoID videoIDPayload
 	_ = json.Unmarshal(payload, &videoID)
-
+	
 	return videoID.VideoID
 }
 

@@ -11,8 +11,9 @@ import (
 func Retry(attempts int, delay time.Duration) messaging.Middleware {
 	return func(next messaging.Handler) messaging.Handler {
 		return messaging.HandlerFunc(func(ctx context.Context, msg messaging.Message) error {
+			var err error
 			for attempt := 0; attempt < attempts; attempt += 1 {
-				err := next.Handle(ctx, msg)
+				err = next.Handle(ctx, msg)
 				if err == nil {
 					return nil
 				}
@@ -26,7 +27,7 @@ func Retry(attempts int, delay time.Duration) messaging.Middleware {
 				}
 			}
 
-			return fmt.Errorf("error after retrying handler")
+			return fmt.Errorf("error after retrying handler: %w", err)
 		})
 	}
 }
