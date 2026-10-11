@@ -26,6 +26,8 @@ func OpenConnection(config core.DataBaseConfig) (*Connection, error) {
 	return &Connection{ConnPool: db}, nil
 }
 
-func (c *Connection) CloseConnection() {
+func (c *Connection) Close() error {
 	c.ConnPool.Close()
+
+	return nil
 }

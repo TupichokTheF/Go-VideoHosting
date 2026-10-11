@@ -2,6 +2,7 @@ package app_redis
 
 import (
 	"context"
+	"log/slog"
 	"project/internal/core"
 
 	"github.com/redis/go-redis/v9"
@@ -20,4 +21,10 @@ func NewClient(cfg *core.RedisConfig) (*redis.Client, error) {
 	}
 
 	return client, nil
+}
+
+func CloseClient(client *redis.Client) {
+	if err := client.Close(); err != nil {
+		slog.Error("error while closing redis connection", "error", err)
+	}
 }

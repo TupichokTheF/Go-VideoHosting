@@ -43,5 +43,6 @@ func run() error {
 	if err := goose.RunContext(context.Background(), *command, db, "."); err != nil {
 		return fmt.Errorf("goose %s: %w", *command, err)
 	}
+
 	return nil
 }
