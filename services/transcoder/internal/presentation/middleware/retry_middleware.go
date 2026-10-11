@@ -2,9 +2,11 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"time"
+	app_ports "transcoder/internal/application/ports"
 	"transcoder/internal/presentation/messaging"
 )
 
@@ -14,8 +16,8 @@ func Retry(attempts int, delay time.Duration) messaging.Middleware {
 			var err error
 			for attempt := 0; attempt < attempts; attempt += 1 {
 				err = next.Handle(ctx, msg)
-				if err == nil {
-					return nil
+				if err == nil || errors.Is(err, app_ports.ErrUnprocessable) {
+					return err
 				}
 
 				slog.Warn("handler failed, retrying", "type", msg.Type, "attempt", attempt+1)

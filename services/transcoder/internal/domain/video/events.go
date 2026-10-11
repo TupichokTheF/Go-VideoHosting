@@ -21,3 +21,19 @@ func (event *UploadedFailedEvent) Payload() map[string]any {
 		"created_at": event.CreatedAt,
 	}
 }
+
+type UploadedSuccessEvent struct {
+	domain_event.Base
+	VideoID uuid.UUID
+}
+
+func (_ *UploadedSuccessEvent) EventName() string {
+	return "video.uploaded.success"
+}
+
+func (event *UploadedSuccessEvent) Payload() map[string]any {
+	return map[string]any{
+		"video_id":   event.VideoID,
+		"created_at": event.CreatedAt,
+	}
+}

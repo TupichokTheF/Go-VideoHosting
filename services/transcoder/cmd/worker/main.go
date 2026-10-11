@@ -41,7 +41,7 @@ func start() error {
 
 	publisher := messaging.NewPublisher(kafkaProducer)
 
-	videoUploadedHandler := handlers.NewVideoUploadedHandler(videoUploadedService, publisher)
+	videoUploadedHandler := handlers.NewVideoUploadedHandler(videoUploadedService)
 
 	kafkaConsumer := app_kafka.NewConsumer(&cfg.KafkaConfig)
 	defer func() {

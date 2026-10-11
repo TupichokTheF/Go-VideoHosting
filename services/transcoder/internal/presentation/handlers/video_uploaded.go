@@ -2,26 +2,19 @@ package handlers
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"time"
-	app_ports "transcoder/internal/application/ports"
-	domain_event "transcoder/internal/domain/event"
-	"transcoder/internal/domain/video"
 	"transcoder/internal/presentation/mappers"
 	"transcoder/internal/presentation/messaging"
 	pres_ports "transcoder/internal/presentation/ports"
 )
 
 type VideoUploadedHandler struct {
-	service   pres_ports.VideoUploadedService
-	publisher pres_ports.Publisher
+	service pres_ports.VideoUploadedService
 }
 
-func NewVideoUploadedHandler(service pres_ports.VideoUploadedService, publisher pres_ports.Publisher) *VideoUploadedHandler {
+func NewVideoUploadedHandler(service pres_ports.VideoUploadedService) *VideoUploadedHandler {
 	return &VideoUploadedHandler{
-		service:   service,
-		publisher: publisher,
+		service: service,
 	}
 }
 
@@ -32,21 +25,9 @@ func (handler *VideoUploadedHandler) Handle(ctx context.Context, msg messaging.M
 	}
 
 	err = handler.service.Transcode(ctx, dto)
-	switch {
-	case err == nil:
+	if err == nil {
 		return nil
-
-	case errors.Is(err, app_ports.ErrUnprocessable):
-		errorEvent := video.UploadedFailedEvent{
-			Base:    domain_event.Base{CreatedAt: time.Now()},
-			VideoID: dto.VideoID,
-		}
-		if err := handler.publisher.PublishEvents(ctx, []domain_event.Interface{&errorEvent}); err != nil {
-			return fmt.Errorf("video transcoding handler: %w", err)
-		}
-
-		return nil
-	default:
-		return fmt.Errorf("video transcoding handler: %w", err)
 	}
+
+	return fmt.Errorf("video transcoding handler: %w", err)
 }

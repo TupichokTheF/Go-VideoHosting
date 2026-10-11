@@ -18,7 +18,11 @@ type publisherInterface interface {
 }
 
 func WithVideoUploadedEvent(handler messaging.Handler, publisher publisherInterface) Option {
-	wrappedHandler := middleware.OnFailure(publishFallback(publisher))(middleware.Retry(5, 1*time.Second)(handler))
+	wrappedHandler := middleware.OnFailure(publishFallback(publisher))(
+		middleware.Retry(5, 1*time.Second)(
+			middleware.OnSuccess(publishSuccess(publisher))(handler),
+		),
+	)
 
 	return func(manager EventsManager) {
 		manager["video.uploaded"] = wrappedHandler
@@ -44,10 +48,25 @@ func publishFallback(publisher publisherInterface) func(ctx context.Context, msg
 	}
 }
 
+func publishSuccess(publisher publisherInterface) func(ctx context.Context, msg messaging.Message) error {
+	return func(ctx context.Context, msg messaging.Message) error {
+		videoID := videoIDFromPayload(msg.Payload)
+
+		event := video.UploadedSuccessEvent{
+			Base: domain_event.Base{
+				CreatedAt: time.Now().UTC(),
+			},
+			VideoID: videoID,
+		}
+
+		return publisher.PublishEvents(ctx, []domain_event.Interface{&event})
+	}
+}
+
 func videoIDFromPayload(payload []byte) uuid.UUID {
 	var videoID videoIDPayload
 	_ = json.Unmarshal(payload, &videoID)
-	
+
 	return videoID.VideoID
 }
 
