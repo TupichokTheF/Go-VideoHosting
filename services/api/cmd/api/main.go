@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"log"
 	"log/slog"
 	"net/http"
+	"os"
+	"os/signal"
 	"project/internal/application/services"
 	"project/internal/core"
 	app_kafka "project/internal/infrastructure/brokers/kafka"
@@ -16,6 +19,8 @@ import (
 	"project/internal/infrastructure/storage"
 	http_handlers "project/internal/presentation/http/handlers"
 	"project/internal/presentation/http/routers"
+	"syscall"
+	"time"
 )
 
 // @title    Go Video Hosting API
@@ -83,7 +88,21 @@ func start() {
 
 	router := routers.GetRouter(routersOptions...)
 
-	if err := http.ListenAndServe(cfg.GetAddress(), router); err != nil {
-		log.Fatal(err.Error())
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT, os.Interrupt)
+
+	server := http.Server{Addr: cfg.GetAddress(), Handler: router}
+	go func() {
+		if err := server.ListenAndServe(); err != nil {
+			slog.Error("error while listening server", "error", err)
+			stop()
+		}
+	}()
+	<-ctx.Done()
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		slog.Error("error while shuting down server", "error", err)
 	}
 }

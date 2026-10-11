@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"os/signal"
+	"syscall"
 	"transcoder/internal/application/services"
 	"transcoder/internal/core"
 	app_kafka "transcoder/internal/infrastructure/brokers/kafka"
@@ -50,17 +52,18 @@ func start() error {
 		}
 	}()
 
-	gErr, ctx := errgroup.WithContext(context.Background())
-
-	gErr.Go(func() error {
-		return kafkaConsumer.StartReading(ctx)
-	})
-
 	eventsHandlers := []pres_events.Option{
 		pres_events.WithVideoUploadedEvent(videoUploadedHandler, publisher),
 	}
 
 	eventsManager := pres_events.NewEventsManager(eventsHandlers...)
+
+	ctx, _ := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	gErr, ctx := errgroup.WithContext(ctx)
+
+	gErr.Go(func() error {
+		return kafkaConsumer.StartReading(ctx)
+	})
 
 	bus := messaging.NewBus(kafkaConsumer, eventsManager)
 	gErr.Go(func() error {
